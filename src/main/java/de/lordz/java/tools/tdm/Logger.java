@@ -8,7 +8,15 @@ package de.lordz.java.tools.tdm;
  */
 public final class Logger {
 	public static void Log(Exception ex) {
-		System.out.println(ex.getMessage());
+		String message = null;
+        var cause = ex.getCause();
+        if (cause != null) {
+            message = cause.getMessage();
+        } else {
+            message = ex.getMessage();
+        }
+		
+		System.out.println("Exception: " + message);
 	}
 	
 	public static void LogVerbose(String message, Object... args) {		

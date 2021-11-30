@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -16,6 +17,8 @@ import com.google.common.base.Strings;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.awt.event.ActionEvent;
@@ -37,6 +40,7 @@ public class MainFrame extends JFrame {
 			setLookAndFeel(configurationData.getThemeName());
 		}
 		FlatLightLaf.updateUI();
+		LocalizationProvider.setLocale("de", "DE");
 	    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
 	            DatabaseProvider.closeDatabase();
@@ -65,10 +69,10 @@ public class MainFrame extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
-		JMenu mainMenuItemFile = new JMenu("File");
+		JMenu mainMenuItemFile = new JMenu(LocalizationProvider.GetString("mainframe.menuitem.file"));
 		menuBar.add(mainMenuItemFile);
 		
-		JMenuItem fileMenuItemOpenDatabase = new JMenuItem("Open Database");
+		JMenuItem fileMenuItemOpenDatabase = new JMenuItem(LocalizationProvider.GetString("mainframe.menuitem.opendatabase"));
 		fileMenuItemOpenDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				performOpenDatabase();
@@ -76,7 +80,7 @@ public class MainFrame extends JFrame {
 		});
 		mainMenuItemFile.add(fileMenuItemOpenDatabase);
 		
-		JMenuItem fileMenuItemExit = new JMenuItem("Exit");
+		JMenuItem fileMenuItemExit = new JMenuItem(LocalizationProvider.GetString("mainframe.menuitem.exit"));
 		fileMenuItemExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
@@ -84,7 +88,7 @@ public class MainFrame extends JFrame {
 		});
 		mainMenuItemFile.add(fileMenuItemExit);
 		
-		JMenu mainMenuItemTheme = new JMenu("Theme");
+		JMenu mainMenuItemTheme = new JMenu(LocalizationProvider.GetString("mainframe.menuitem.themes"));
 		menuBar.add(mainMenuItemTheme);
 		populateThemeMenuItems(mainMenuItemTheme);		
 		
@@ -140,6 +144,37 @@ public class MainFrame extends JFrame {
 		}
 	}
 	
+	private void openDatabaseAsync(String databasePath, StatusBar statusBar) {
+		var waitDialog = new WaitDialog();
+		var worker = new SwingWorker<Boolean, Void>() {
+		    @Override
+		    public Boolean doInBackground() {
+		    	return DatabaseProvider.openDatabase(databasePath);
+		    }
+
+		    @Override
+		    public void done() {
+		    	try {
+		            if (get()) {
+		            	statusBar.setMessage(String.format(LocalizationProvider.GetString("mainframe.statusbar.current_database"), databasePath));
+		            } else {
+		            	var messageTemplate = LocalizationProvider.GetString("mainframe.error.opendatabase");
+		            	var message = String.format(messageTemplate, databasePath);
+		            	JOptionPane.showMessageDialog(null, message, LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
+		            }
+		        } catch (InterruptedException ignore) {}
+		        catch (java.util.concurrent.ExecutionException ex) {
+		            Logger.Log(ex);
+		        }
+		    	
+		    	waitDialog.close();
+		    }
+		};
+		
+		worker.execute();
+		waitDialog.showDialog(LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), this);
+	}
+	
 	private void performOpenDatabase() {
 		try {
 			final var fileChooser = new JFileChooser();
@@ -153,9 +188,10 @@ public class MainFrame extends JFrame {
 				databasePath = fileChooser.getSelectedFile().toString();			
 	        }
 			
-			if (DatabaseProvider.openDatabase(databasePath)) {
-				this.statusBar.setMessage(String.format("Current database: %s", databasePath));	
-			}		
+			openDatabaseAsync(databasePath, this.statusBar);
+//			if (DatabaseProvider.openDatabase(databasePath)) {
+//				this.statusBar.setMessage(String.format("Current database: %s", databasePath));	
+//			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);
