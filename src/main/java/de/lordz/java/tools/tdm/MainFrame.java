@@ -88,6 +88,16 @@ public class MainFrame extends JFrame {
 		});
 		mainMenuItemFile.add(fileMenuItemExit);
 		
+		// only for testing
+		JMenuItem customerMenuItem = new JMenuItem("Customer");
+		customerMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				customerTest();
+			}
+		});
+		mainMenuItemFile.add(customerMenuItem);
+		// only for testing
+		
 		JMenu mainMenuItemTheme = new JMenu(LocalizationProvider.GetString("mainframe.menuitem.themes"));
 		menuBar.add(mainMenuItemTheme);
 		populateThemeMenuItems(mainMenuItemTheme);		
@@ -100,6 +110,11 @@ public class MainFrame extends JFrame {
 		
 		getContentPane().setLayout(new BorderLayout());
 		this.statusBar = StatusBar.addStatusbar(this);
+	}
+	
+	private void customerTest() {
+		var cutomerDialog = new CustomerDialog();
+		cutomerDialog.showDialog(null, this);
 	}
 	
 	private void populateThemeMenuItems(JMenu mainMenuItem) {
@@ -149,6 +164,10 @@ public class MainFrame extends JFrame {
 		var worker = new SwingWorker<Boolean, Void>() {
 		    @Override
 		    public Boolean doInBackground() {
+//		    	DatabaseProvider.openDatabase(databasePath);
+//		    	var customer = new CustomerEntity("Verein1", 10.5f);
+//		    	DatabaseProvider.saveEntity(customer);
+//		    	return  true;
 		    	return DatabaseProvider.openDatabase(databasePath);
 		    }
 
@@ -189,9 +208,6 @@ public class MainFrame extends JFrame {
 	        }
 			
 			openDatabaseAsync(databasePath, this.statusBar);
-//			if (DatabaseProvider.openDatabase(databasePath)) {
-//				this.statusBar.setMessage(String.format("Current database: %s", databasePath));	
-//			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);

@@ -17,6 +17,7 @@ public final class Logger {
         }
 		
 		System.out.println("Exception: " + message);
+		ex.printStackTrace();
 	}
 	
 	public static void LogVerbose(String message, Object... args) {		
