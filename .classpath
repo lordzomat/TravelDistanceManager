@@ -15,5 +15,8 @@
 	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/guava-31.0.1-jre.jar"/>
 	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/flatlaf-1.6.4.jar"/>
 	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/flatlaf-intellij-themes-1.6.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-swing-1.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-font_awesome-4.7.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-1.0.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -22,6 +22,13 @@ import javax.swing.JOptionPane;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.awt.event.ActionEvent;
+import java.awt.Color;
+
+import java.awt.FlowLayout;
+import javax.swing.JToolBar;
+import javax.swing.JButton;
+import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.swing.IconFontSwing;
 
 public class MainFrame extends JFrame {
 
@@ -40,6 +47,7 @@ public class MainFrame extends JFrame {
 			setLookAndFeel(configurationData.getThemeName());
 		}
 		FlatLightLaf.updateUI();
+		IconFontSwing.register(FontAwesome.getIconFont());
 		LocalizationProvider.setLocale("de", "DE");
 	    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
@@ -65,7 +73,7 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 600);
 		setTitle(String.format("%s (v%s)", AppConstants.ApplicationName, AppConstants.ApplicationVersion));
-
+		setIconImage(IconFontSwing.buildImage(FontAwesome.ROAD, 20, Color.lightGray));
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
@@ -105,10 +113,26 @@ public class MainFrame extends JFrame {
 		contentPane = new JPanel();
 //		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setBorder(new EmptyBorder(5, 0, 5, 0));
-		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		contentPane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
 		
-		getContentPane().setLayout(new BorderLayout());
+		JPanel panel = new JPanel();
+		contentPane.add(panel);
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JToolBar toolBar = new JToolBar();
+		panel.add(toolBar, BorderLayout.NORTH);
+		
+		JButton buttonCustomersView = new JButton(IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray));
+		buttonCustomersView.setToolTipText(LocalizationProvider.GetString("mainframe.button.tooltip.customers"));
+		toolBar.add(buttonCustomersView);
+		JButton buttonTripsView = new JButton(IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray));
+		buttonTripsView.setToolTipText(LocalizationProvider.GetString("mainframe.button.tooltip.trips"));
+		toolBar.add(buttonTripsView);
+		JButton buttonTripsReport = new JButton(IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray));
+		buttonTripsReport.setToolTipText(LocalizationProvider.GetString("mainframe.button.tooltip.trips"));
+		toolBar.add(buttonTripsReport);
 		this.statusBar = StatusBar.addStatusbar(this);
 	}
 	
@@ -223,5 +247,4 @@ public class MainFrame extends JFrame {
 	    	this.className = className;
 	    }
 	}
-
 }

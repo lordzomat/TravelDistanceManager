@@ -1,6 +1,7 @@
 package de.lordz.java.tools.tdm;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 
@@ -11,6 +12,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import com.google.common.base.Strings;
+
+import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.swing.IconFontSwing;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -41,6 +45,7 @@ public class CustomerDialog extends JDialog {
 	public CustomerDialog() {
 		setBounds(100, 100, 450, 300);
 		setResizable(false);
+		setIconImage(IconFontSwing.buildImage(FontAwesome.USERS, 15, Color.lightGray));
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -145,6 +150,7 @@ public class CustomerDialog extends JDialog {
 	}
 	
 	public void showDialog(CustomerEntity customer, java.awt.Window window) {
+		String titleKey = customer == null ? "customerdialog.title.new" : "customerdialog.title.edit";
 		try {
 			if (customer != null) {
 				this.textFieldName.setText(customer.getName());
@@ -168,8 +174,7 @@ public class CustomerDialog extends JDialog {
 		catch (Exception ex) {
 			Logger.Log(ex);
 		}
-		
-		String titleKey = customer == null ? "customerdialog.title.new" : "customerdialog.title.edit";
+
 		this.setTitle(LocalizationProvider.GetString(titleKey));
 		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 		this.setLocationRelativeTo(window);
