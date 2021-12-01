@@ -105,9 +105,9 @@ public class CustomerBasicInfo extends JPanel {
 		add(labelDescription);
 		
 		textAreaScrollPane = new JScrollPane();
+		springLayout.putConstraint(SpringLayout.SOUTH, textAreaScrollPane, -10, SpringLayout.SOUTH, this);
 		this.textAreaDescription = new JTextArea();
 		this.textAreaScrollPane.setViewportView(this.textAreaDescription);
-		springLayout.putConstraint(SpringLayout.SOUTH, this.textAreaScrollPane, -87, SpringLayout.SOUTH, this);
 		springLayout.putConstraint(SpringLayout.EAST, this.textAreaScrollPane, 192, SpringLayout.EAST, this.textFieldDistance);
 		springLayout.putConstraint(SpringLayout.NORTH, this.textAreaScrollPane, 6, SpringLayout.SOUTH, this.textFieldDistance);
 		springLayout.putConstraint(SpringLayout.WEST, this.textAreaScrollPane, 0, SpringLayout.WEST, this.textFieldDistance);
