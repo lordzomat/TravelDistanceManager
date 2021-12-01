@@ -37,7 +37,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.JButton;
 import javax.swing.SpringLayout;
-import javax.swing.JTextField;
 
 public class MainFrame extends JFrame {
 
@@ -356,7 +355,6 @@ public class MainFrame extends JFrame {
 	
 	private void fillCustomerInfo(CustomerEntity entity) {
 		this.customerBasicInfo.fillFromEnity(entity);
-//		this.textFieldCustomerName.setText(entity.getName());
 	}
 	
 	private static HashMap<Integer, EntityDataModelHelper<CustomerEntity>> createCustomersColumnMap() {
