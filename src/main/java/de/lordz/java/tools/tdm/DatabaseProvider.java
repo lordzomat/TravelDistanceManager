@@ -33,8 +33,8 @@ public final class DatabaseProvider {
 	 * @param databasePath The full path to the database
 	 * @return Returns true on success, otherwise false.
 	 */
-	public static Boolean openDatabase(String databasePath) {
-		Boolean result = false;
+	public static boolean openDatabase(String databasePath) {
+		boolean result = false;
 		try {
 			if (isOpen.get())
 			{
@@ -81,8 +81,8 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
-	public static Boolean saveEntity(Object entity) {
-		Boolean result = false;
+	public static boolean saveEntity(Object entity) {
+		boolean result = false;
 		try {
 			if (!isOpen.get()) {
 				return result;
@@ -107,8 +107,8 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
-	public static Boolean updateEntity(Object entity) {
-		Boolean result = false;
+	public static boolean updateEntity(Object entity) {
+		boolean result = false;
 		try {
 			if (!isOpen.get()) {
 				return result;
@@ -204,8 +204,8 @@ public final class DatabaseProvider {
 //	    return Date.from(Instant.from(temporalAccessor));
 	}
 	
-	private static Boolean ensureDatabaseIsCreated() {
-		Boolean result = false;
+	private static boolean ensureDatabaseIsCreated() {
+		boolean result = false;
 		try {
 			final var manager = createEntityManager();
 			if (manager != null) {
@@ -239,8 +239,8 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
-	private static Boolean initializeHistoryAndSequence(final EntityManager manager) {
-		Boolean result = false;
+	private static boolean initializeHistoryAndSequence(final EntityManager manager) {
+		boolean result = false;
 		try {
 			if (manager != null) {
 				var query = manager.createNativeQuery("SELECT count(*) FROM tbDatabaseHistory");
