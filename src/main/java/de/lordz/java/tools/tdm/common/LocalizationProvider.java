@@ -1,4 +1,4 @@
-package de.lordz.java.tools.tdm;
+package de.lordz.java.tools.tdm.common;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -41,7 +41,7 @@ public class LocalizationProvider {
 	 * @param key The key identifying the localized text.
 	 * @return Returns the text in it's localized form.
 	 */
-	public static String GetString(String key) {
+	public static String getString(String key) {
 		return activeBundle.getString(key);
 	}
 }

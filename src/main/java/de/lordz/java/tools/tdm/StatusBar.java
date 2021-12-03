@@ -29,7 +29,7 @@ public class StatusBar extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     }
 
-    public void setMessage(String message) {
+    public void setStatusMessage(String message) {
     	this.statusLabel.setText(message);
     }
         

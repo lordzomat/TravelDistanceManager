@@ -4,24 +4,21 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.util.function.Consumer;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import com.google.common.base.Strings;
 
+import de.lordz.java.tools.tdm.common.LocalizationProvider;
+import de.lordz.java.tools.tdm.common.Logger;
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;
-
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.SpringLayout;
-import java.awt.event.ActionEvent;
-import java.util.function.Consumer;
-import javax.swing.JTextArea;
 
 public class CustomerDialog extends JDialog {
 
@@ -57,14 +54,14 @@ public class CustomerDialog extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				this.buttonOk = new JButton(LocalizationProvider.GetString("mainframe.button.accept"));
+				this.buttonOk = new JButton(LocalizationProvider.getString("mainframe.button.accept"));
 				this.buttonOk.setActionCommand("OK");
 				this.buttonOk.addActionListener(e -> performButtonClick(e));
 				buttonPane.add(this.buttonOk);
 				getRootPane().setDefaultButton(this.buttonOk);
 			}
 			{
-				JButton cancelButton = new JButton(LocalizationProvider.GetString("mainframe.button.cancel"));
+				JButton cancelButton = new JButton(LocalizationProvider.getString("mainframe.button.cancel"));
 				cancelButton.setActionCommand("Cancel");
 				cancelButton.addActionListener(e -> performButtonClick(e));
 				buttonPane.add(cancelButton);
@@ -82,7 +79,7 @@ public class CustomerDialog extends JDialog {
 			Logger.Log(ex);
 		}
 
-		this.setTitle(LocalizationProvider.GetString(titleKey));
+		this.setTitle(LocalizationProvider.getString(titleKey));
 		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 		this.setLocationRelativeTo(window);
 		this.setVisible(true);

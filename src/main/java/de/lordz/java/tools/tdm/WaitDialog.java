@@ -7,6 +7,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import de.lordz.java.tools.tdm.common.LocalizationProvider;
+
 
 /**
  * Dialog to show please wait and block (Modal).
@@ -25,7 +27,7 @@ class WaitDialog {
 		progressBar.setIndeterminate(true);
 		var panel = new JPanel(new BorderLayout());
 		panel.add(progressBar, BorderLayout.CENTER);
-		panel.add(new JLabel(LocalizationProvider.GetString("waitdialog.pleasewait")), BorderLayout.PAGE_START);
+		panel.add(new JLabel(LocalizationProvider.getString("waitdialog.pleasewait")), BorderLayout.PAGE_START);
 		this.dialog.add(panel);
 		this.dialog.setUndecorated(true);
 		this.dialog.pack();

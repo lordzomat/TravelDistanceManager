@@ -3,6 +3,8 @@ package de.lordz.java.tools.tdm;
 import java.util.AbstractMap;
 import java.util.List;
 
+import de.lordz.java.tools.tdm.common.Logger;
+
 /**
  * Class to manage customers.
  * 
@@ -20,8 +22,10 @@ public class CustomerManager {
 	public static CustomerEntity getCustomer(int id) {
 		CustomerEntity result = null;
 		try {
-			var parameter = new AbstractMap.SimpleEntry<String, Object>("customerId", id);
-			result = DatabaseProvider.getEntity("SELECT c FROM CustomerEntity c WHERE c.id=:customerId", CustomerEntity.class, parameter);
+			if (DatabaseProvider.getIsOpen()) {
+				var parameter = new AbstractMap.SimpleEntry<String, Object>("customerId", id);
+				result = DatabaseProvider.getEntity("SELECT c FROM CustomerEntity c WHERE c.id=:customerId", CustomerEntity.class, parameter);
+			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);
@@ -38,7 +42,9 @@ public class CustomerManager {
 	public static List<CustomerEntity> getCustomers() {
 		List<CustomerEntity> result = null;
 		try {
-			result = DatabaseProvider.getEntities("SELECT c FROM CustomerEntity c WHERE c.deleted=0", CustomerEntity.class);
+			if (DatabaseProvider.getIsOpen()) {
+				result = DatabaseProvider.getEntities("SELECT c FROM CustomerEntity c WHERE c.deleted=0", CustomerEntity.class);
+			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);

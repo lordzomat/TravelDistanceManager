@@ -16,6 +16,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.google.common.base.Strings;
 
+import de.lordz.java.tools.tdm.common.AppConstants;
+import de.lordz.java.tools.tdm.common.LocalizationProvider;
+import de.lordz.java.tools.tdm.common.Logger;
+import de.lordz.java.tools.tdm.config.AppConfiguration;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -42,6 +47,7 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 404497382974994431L;
 	private static final DefaultTableCellRenderer rightTableCellRenderer = CreateTableCellRightRenderer();
+	private AppConfiguration appConfiguration;
 	private JPanel contentPane;
 	private StatusBar statusBar;
 	private JTable tableCustomers;
@@ -49,6 +55,7 @@ public class MainFrame extends JFrame {
 	private JButton buttonNewCustomer;
 	private JButton buttonEditCustomer;
 	private JButton buttonDeleteCustomer;
+	private JMenu fileMenuRecentDatabases;
 	private CustomerBasicInfo customerBasicInfo;
 
 	/**
@@ -57,10 +64,6 @@ public class MainFrame extends JFrame {
 	public static void main(String[] args) {
 		FlatLightLaf.setup();
 //		UIManager.put("TitlePane.menuBarEmbedded", false);
-		var configurationData = ConfigurationData.LoadConfiguration();
-		if (configurationData != null ) {
-			setLookAndFeel(configurationData.getThemeName());
-		}
 		FlatLightLaf.updateUI();
 		IconFontSwing.register(FontAwesome.getIconFont());
 		LocalizationProvider.setLocale("de", "DE");
@@ -92,27 +95,30 @@ public class MainFrame extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
-		JMenu mainMenuItemFile = new JMenu(LocalizationProvider.GetString("mainframe.menuitem.file"));
+		JMenu mainMenuItemFile = new JMenu(LocalizationProvider.getString("mainframe.menuitem.file"));
 		menuBar.add(mainMenuItemFile);
 		
-		JMenuItem fileMenuItemOpenDatabase = new JMenuItem(LocalizationProvider.GetString("mainframe.menuitem.opendatabase"));
+		JMenuItem fileMenuItemOpenDatabase = new JMenuItem(LocalizationProvider.getString("mainframe.menuitem.opendatabase"));
 		fileMenuItemOpenDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				performOpenDatabase();
 			}
 		});
 		mainMenuItemFile.add(fileMenuItemOpenDatabase);
+
+		this.fileMenuRecentDatabases = new JMenu(LocalizationProvider.getString("mainframe.menuitem.recentdatabases"));
+		mainMenuItemFile.add(this.fileMenuRecentDatabases);
 		
-		JMenuItem fileMenuItemExit = new JMenuItem(LocalizationProvider.GetString("mainframe.menuitem.exit"));
+		var fileMenuItemExit = new JMenuItem(LocalizationProvider.getString("mainframe.menuitem.exit"));
 		fileMenuItemExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
 		mainMenuItemFile.add(fileMenuItemExit);
-		// only for testing
 		
-		JMenu mainMenuItemTheme = new JMenu(LocalizationProvider.GetString("mainframe.menuitem.themes"));
+
+		JMenu mainMenuItemTheme = new JMenu(LocalizationProvider.getString("mainframe.menuitem.themes"));
 		menuBar.add(mainMenuItemTheme);
 		populateThemeMenuItems(mainMenuItemTheme);		
 		
@@ -132,13 +138,13 @@ public class MainFrame extends JFrame {
 						
 		JPanel panelCustomers = new JPanel();
 		panelCustomers.setLayout(new BorderLayout(0, 0));
-		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), panelCustomers, LocalizationProvider.GetString("mainframe.button.tooltip.customers"));
+		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), panelCustomers, LocalizationProvider.getString("mainframe.button.tooltip.customers"));
 		
 		JPanel panelTrips = new JPanel();
-		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray), panelTrips, LocalizationProvider.GetString("mainframe.button.tooltip.trips"));
+		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray), panelTrips, LocalizationProvider.getString("mainframe.button.tooltip.trips"));
 		
 		JPanel panelReport = new JPanel();
-		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport, LocalizationProvider.GetString("mainframe.button.tooltip.report"));
+		tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport, LocalizationProvider.getString("mainframe.button.tooltip.report"));
 		
 		JScrollPane scrollPane = new JScrollPane();
 		panelCustomers.add(scrollPane, BorderLayout.WEST);
@@ -162,17 +168,17 @@ public class MainFrame extends JFrame {
 		panelCustomersRight.add(toolBar, BorderLayout.NORTH);
 		
 		this.buttonNewCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
-		this.buttonNewCustomer.setToolTipText(LocalizationProvider.GetString("mainframe.button.new"));
+		this.buttonNewCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
 		this.buttonNewCustomer.addActionListener(e -> openCustomerDialog(null));
 		toolBar.add(this.buttonNewCustomer);
 		
 		this.buttonEditCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PENCIL_SQUARE, 20, Color.ORANGE));
-		this.buttonEditCustomer.setToolTipText(LocalizationProvider.GetString("mainframe.button.edit"));
+		this.buttonEditCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.edit"));
 		this.buttonEditCustomer.addActionListener(e -> processCustomerEditDeleteClick(true));
 		toolBar.add(this.buttonEditCustomer);
 		
 		this.buttonDeleteCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
-		this.buttonDeleteCustomer.setToolTipText(LocalizationProvider.GetString("mainframe.button.delete"));
+		this.buttonDeleteCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.delete"));
 		this.buttonDeleteCustomer.addActionListener(e -> processCustomerEditDeleteClick(false));
 		toolBar.add(this.buttonDeleteCustomer);
 		
@@ -190,7 +196,17 @@ public class MainFrame extends JFrame {
 		this.customerBasicInfo.setEditable(false);
 		
 		this.statusBar = StatusBar.addStatusbar(this);
+		this.statusBar.setStatusMessage(LocalizationProvider.getString("mainframe.statusbar.nodatabaseopen"));
 		setActionButtonsEnabledState(false);
+		
+		this.appConfiguration = AppConfiguration.loadAppConfiguration();
+		if (this.appConfiguration != null) {
+			if (!Strings.isNullOrEmpty(this.appConfiguration.SelectedTheme)) {
+				setLookAndFeel(this.appConfiguration.SelectedTheme);
+			}
+		}
+		
+		reloadRecentDatabseMenu();
 	}
 	
 	private void openCustomerDialog(CustomerEntity entity) {
@@ -221,7 +237,13 @@ public class MainFrame extends JFrame {
 			final var eventSource = event.getSource();
 			if (eventSource != null && eventSource instanceof ThemeMenuItem) {
 				var themeMenuItem = (ThemeMenuItem)eventSource;
-				setLookAndFeel(themeMenuItem.getThemeName());
+				var themeName = themeMenuItem.getThemeName();
+				if (this.appConfiguration != null) {
+					this.appConfiguration.SelectedTheme = themeName;
+					saveConfiguration();
+				}
+				
+				setLookAndFeel(themeName);
 			}
 		}
 		catch (Exception ex) {
@@ -259,13 +281,15 @@ public class MainFrame extends JFrame {
 		    public void done() {
 		    	try {
 		            if (get()) {
-		            	statusBar.setMessage(String.format(LocalizationProvider.GetString("mainframe.statusbar.current_database"), databasePath));
+		            	statusBar.setStatusMessage(String.format(LocalizationProvider.getString("mainframe.statusbar.current_database"), databasePath));
 		            	setActionButtonsEnabledState(true);
+		            	addRecentDatabase(databasePath);
 		            } else {
 		            	setActionButtonsEnabledState(false);
-		            	var messageTemplate = LocalizationProvider.GetString("mainframe.error.opendatabase");
+		            	var messageTemplate = LocalizationProvider.getString("mainframe.error.opendatabase");
 		            	var message = String.format(messageTemplate, databasePath);
-		            	JOptionPane.showMessageDialog(null, message, LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
+		            	JOptionPane.showMessageDialog(null, message, LocalizationProvider.getString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
+		            	statusBar.setStatusMessage(LocalizationProvider.getString("mainframe.statusbar.nodatabaseopen"));
 		            }
 		        } catch (InterruptedException ignore) {}
 		        catch (java.util.concurrent.ExecutionException ex) {
@@ -277,7 +301,7 @@ public class MainFrame extends JFrame {
 		};
 		
 		worker.execute();
-		waitDialog.showDialog(LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), this);
+		waitDialog.showDialog(LocalizationProvider.getString("mainframe.menuitem.opendatabase"), this);
 	}
 	
 	private void performOpenDatabase() {
@@ -288,27 +312,36 @@ public class MainFrame extends JFrame {
 			fileChooser.setFileFilter(filter);
 			fileChooser.setAcceptAllFileFilterUsed(false);
 			int result = fileChooser.showOpenDialog(this);
-			String databasePath = "Q:\\Java\\IDE\\data\\tdm.db"; // todo: fallback for development versions, replace with dev configuration file read later
 			if (result == JFileChooser.APPROVE_OPTION) {
-				databasePath = fileChooser.getSelectedFile().toString();			
-	        } else {
-	        	if (!new java.io.File(databasePath).exists()) {
-	        		databasePath = null;;
-	        		JOptionPane.showMessageDialog(this, "Database does not exist!", LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
-	        	}
+				final var databasePath = fileChooser.getSelectedFile().toString();
+				openDatabase(databasePath);
 	        }
-			
-			if (!Strings.isNullOrEmpty(databasePath)) {
-				openDatabaseAsync(databasePath, this.statusBar);
-				reloadCustomersTable();
-			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);
 		}
 	}
 	
+	private void openDatabase(String databasePath) {
+		try {
+			if (!Strings.isNullOrEmpty(databasePath) && new java.io.File(databasePath).exists()) {
+				if (DatabaseProvider.getIsOpen()) {
+					DatabaseProvider.closeDatabase();
+				}
+				
+				openDatabaseAsync(databasePath, this.statusBar);
+				reloadCustomersTable();
+			}
+		}catch (Exception ex) {
+			Logger.Log(ex);
+		}
+	}
+	
 	private void reloadCustomersTable() {
+		if (!DatabaseProvider.getIsOpen()) {
+			return;
+		}
+		
 		var customers = CustomerManager.getCustomers();
 		tableCustomers.setModel(new EntityTableModel<CustomerEntity>(customers, this.customersColumnMap));
 		var columnModel = tableCustomers.getColumnModel();
@@ -366,9 +399,9 @@ public class MainFrame extends JFrame {
 	
 	private static HashMap<Integer, EntityDataModelHelper<CustomerEntity>> createCustomersColumnMap() {
 		HashMap<Integer, EntityDataModelHelper<CustomerEntity>> columnMap = new HashMap<Integer, EntityDataModelHelper<CustomerEntity>>();
-		columnMap.put(0, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.GetString("customerdialog.label.name"), (entity) -> entity.getName()));
-		columnMap.put(1, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.GetString("customerdialog.label.city"), (entity) -> entity.getCity()));
-		columnMap.put(2, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.GetString("customerdialog.label.distance"), (entity) -> entity.getDistance()));
+		columnMap.put(0, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.getString("customerdialog.label.name"), (entity) -> entity.getName()));
+		columnMap.put(1, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.getString("customerdialog.label.city"), (entity) -> entity.getCity()));
+		columnMap.put(2, new EntityDataModelHelper<CustomerEntity>(LocalizationProvider.getString("customerdialog.label.distance"), (entity) -> entity.getDistance()));
 		return columnMap;
 	}
 	
@@ -376,6 +409,53 @@ public class MainFrame extends JFrame {
 		var rightRenderer = new DefaultTableCellRenderer();
 	    rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
 		return rightRenderer;
+	}
+	
+	private void saveConfiguration() {
+		if (!this.appConfiguration.saveConfiguration()) {
+			showErrorMessage(String.format(LocalizationProvider.getString("mainframe.error.saveconfiguration"), AppConfiguration.ConfigurationFilePath));
+		}
+	}
+	
+	private void showErrorMessage(String message) {
+		JOptionPane.showMessageDialog(this, message, LocalizationProvider.getString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
+	}
+	
+	private void addRecentDatabase(String databasePath) {
+		try {
+			if (!Strings.isNullOrEmpty(databasePath)) {
+				var recentDatabases = this.appConfiguration.RecentDatabases;
+				if (recentDatabases != null) {
+					int currentIndex = recentDatabases.indexOf(databasePath);
+					if (currentIndex >= 0) {
+						recentDatabases.remove(databasePath);
+					}
+					
+					recentDatabases.add(0, databasePath);
+				}
+				
+				saveConfiguration();
+				reloadRecentDatabseMenu();
+			}
+		} catch (Exception ex) {
+			Logger.Log(ex);
+		}
+	}
+	
+	private void reloadRecentDatabseMenu() {
+		try {
+			var recentDatabases = this.appConfiguration.RecentDatabases;
+			if (recentDatabases != null) {
+				this.fileMenuRecentDatabases.removeAll();
+				for (String databasePath : recentDatabases) {
+					var menuItem = new JMenuItem(databasePath);
+					menuItem.addActionListener(e -> openDatabase(databasePath));
+					this.fileMenuRecentDatabases.add(menuItem);
+				}
+			}
+		} catch (Exception ex) {
+			Logger.Log(ex);
+		}
 	}
 	
 	private class ThemeEntry {

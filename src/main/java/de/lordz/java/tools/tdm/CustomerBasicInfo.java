@@ -17,6 +17,9 @@ import javax.swing.text.JTextComponent;
 
 import com.google.common.base.Strings;
 
+import de.lordz.java.tools.tdm.common.LocalizationProvider;
+import de.lordz.java.tools.tdm.common.Logger;
+
 /**
  * Panel to handel basic customer info.
  * 
@@ -40,7 +43,7 @@ public class CustomerBasicInfo extends JPanel {
 		var springLayout = new SpringLayout();
 		setLayout(springLayout);		
 		
-		var labelName = new JLabel(LocalizationProvider.GetString("customerdialog.label.name") + ":");
+		var labelName = new JLabel(LocalizationProvider.getString("customerdialog.label.name") + ":");
 		springLayout.putConstraint(SpringLayout.NORTH, labelName, 5, SpringLayout.NORTH, this);
 		springLayout.putConstraint(SpringLayout.WEST, labelName, 5, SpringLayout.WEST, this);
 		springLayout.putConstraint(SpringLayout.SOUTH, labelName, 31, SpringLayout.NORTH, this);
@@ -53,7 +56,7 @@ public class CustomerBasicInfo extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, this.textFieldName, 217, SpringLayout.WEST, this);
 		add(this.textFieldName);
 		
-		var labelStreet = new JLabel(LocalizationProvider.GetString("customerdialog.label.street") + ":");
+		var labelStreet = new JLabel(LocalizationProvider.getString("customerdialog.label.street") + ":");
 		springLayout.putConstraint(SpringLayout.WEST, labelStreet, 0, SpringLayout.WEST, labelName);
 		add(labelStreet);
 		
@@ -64,7 +67,7 @@ public class CustomerBasicInfo extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, this.textFieldStreet, 0, SpringLayout.EAST, this.textFieldName);
 		add(this.textFieldStreet);
 		
-		var labelPostcode = new JLabel(LocalizationProvider.GetString("customerdialog.label.postcode") + ":");
+		var labelPostcode = new JLabel(LocalizationProvider.getString("customerdialog.label.postcode") + ":");
 		springLayout.putConstraint(SpringLayout.WEST, labelPostcode, 0, SpringLayout.WEST, labelName);
 		add(labelPostcode);
 		
@@ -75,7 +78,7 @@ public class CustomerBasicInfo extends JPanel {
 		springLayout.putConstraint(SpringLayout.EAST, this.textFieldPostcode, 0, SpringLayout.EAST, this.textFieldName);
 		add(this.textFieldPostcode);
 		
-		var labelCity = new JLabel(LocalizationProvider.GetString("customerdialog.label.city") + ":");
+		var labelCity = new JLabel(LocalizationProvider.getString("customerdialog.label.city") + ":");
 		springLayout.putConstraint(SpringLayout.WEST, labelCity, 0, SpringLayout.WEST, labelName);
 		add(labelCity);
 		
@@ -94,12 +97,12 @@ public class CustomerBasicInfo extends JPanel {
 		this.textFieldDistance.setColumns(10);
 		add(this.textFieldDistance);
 		
-		var labelDistance = new JLabel(LocalizationProvider.GetString("customerdialog.label.distance") + ":");
+		var labelDistance = new JLabel(LocalizationProvider.getString("customerdialog.label.distance") + ":");
 		springLayout.putConstraint(SpringLayout.NORTH, labelDistance, 3, SpringLayout.NORTH, this.textFieldDistance);
 		springLayout.putConstraint(SpringLayout.WEST, labelDistance, 0, SpringLayout.WEST, labelName);
 		add(labelDistance);
 		
-		JLabel labelDescription = new JLabel(LocalizationProvider.GetString("customerdialog.label.description") + ":");
+		JLabel labelDescription = new JLabel(LocalizationProvider.getString("customerdialog.label.description") + ":");
 		springLayout.putConstraint(SpringLayout.NORTH, labelDescription, 14, SpringLayout.SOUTH, labelDistance);
 		springLayout.putConstraint(SpringLayout.WEST, labelDescription, 0, SpringLayout.WEST, labelName);
 		add(labelDescription);

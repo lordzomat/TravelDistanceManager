@@ -13,7 +13,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
-import com.google.common.base.Strings; 
+import com.google.common.base.Strings;
+
+import de.lordz.java.tools.tdm.common.Logger; 
 
 
 /**
@@ -79,6 +81,15 @@ public final class DatabaseProvider {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Checks if a database is open.
+	 * 
+	 * @return Returns true if a database is open, otherwise false.
+	 */
+	public static boolean getIsOpen() {
+		return isOpen.get();
 	}
 	
 	public static boolean saveEntity(Object entity) {
@@ -284,6 +295,7 @@ public final class DatabaseProvider {
 		if (isOpen.get()) {
 			if (factoryInstance != null) {
 				factoryInstance.close();
+				factoryInstance = null;
 			}
 			
 			isOpen.set(false);
