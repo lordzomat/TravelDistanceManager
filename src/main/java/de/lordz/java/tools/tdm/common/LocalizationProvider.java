@@ -16,46 +16,46 @@ import javax.swing.UIManager;
  */
 public class LocalizationProvider {
 
-	private static ResourceBundle activeBundle;
-	private static Locale activeLocale;
-	
-	/**
-	 * Sets the locale.
-	 * 
-	 * @param language The primary language e.g. en/de
-	 * @param countrry The specific (sub) language to the country e.g. US,GB,DE
-	 */
-	public static void setLocale(String language, String country) {
-		setLocale(new Locale(language, country));
-	}
-	
-	/**
-	 * Sets the locale.
-	 * 
-	 * @param locale The locale to set.
-	 */
-	public static void setLocale(Locale locale) {
-		activeLocale = locale;
-		activeBundle = ResourceBundle.getBundle("de.lordz.java.tools.tdm.i18n.UiMessages", locale);
-		JOptionPane.setDefaultLocale(locale);
-		JFileChooser.setDefaultLocale(locale);
-		UIManager.getDefaults().addResourceBundle("de.lordz.java.tools.tdm.i18n.ControlMessages");
-	}
-	
-	/**
-	 * Retrieves the current locale.
-	 */
-	public static Locale getLocale() {
-		return activeLocale;
-	}
-	
-	/**
-	 * Gets the localized string.
-	 * 
-	 * @param key The key identifying the localized text.
-	 * @return Returns the text in it's localized form.
-	 */
-	public static String getString(String key) {
-		return activeBundle.getString(key);
-	}
+    private static ResourceBundle activeBundle;
+    private static Locale activeLocale;
+
+    /**
+     * Sets the locale.
+     * 
+     * @param language The primary language e.g. en/de
+     * @param countrry The specific (sub) language to the country e.g. US,GB,DE
+     */
+    public static void setLocale(String language, String country) {
+        setLocale(new Locale(language, country));
+    }
+
+    /**
+     * Sets the locale.
+     * 
+     * @param locale The locale to set.
+     */
+    public static void setLocale(Locale locale) {
+        activeLocale = locale;
+        activeBundle = ResourceBundle.getBundle("de.lordz.java.tools.tdm.i18n.UiMessages", locale);
+        JOptionPane.setDefaultLocale(locale);
+        JFileChooser.setDefaultLocale(locale);
+        UIManager.getDefaults().addResourceBundle("de.lordz.java.tools.tdm.i18n.ControlMessages");
+    }
+
+    /**
+     * Retrieves the current locale.
+     */
+    public static Locale getLocale() {
+        return activeLocale;
+    }
+
+    /**
+     * Gets the localized string.
+     * 
+     * @param key The key identifying the localized text.
+     * @return Returns the text in it's localized form.
+     */
+    public static String getString(String key) {
+        return activeBundle.getString(key);
+    }
 }

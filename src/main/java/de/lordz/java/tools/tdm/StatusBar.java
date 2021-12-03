@@ -1,4 +1,5 @@
 package de.lordz.java.tools.tdm;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
@@ -16,9 +17,9 @@ import javax.swing.SwingConstants;
  */
 public class StatusBar extends JPanel {
 
-	private static final long serialVersionUID = -8756103519005749873L;
-	private JLabel statusLabel;
-	
+    private static final long serialVersionUID = -8756103519005749873L;
+    private JLabel statusLabel;
+
     /** Creates a new instance of StatusBar */
     private StatusBar(int width, int height) {
         super();
@@ -30,16 +31,16 @@ public class StatusBar extends JPanel {
     }
 
     public void setStatusMessage(String message) {
-    	this.statusLabel.setText(message);
+        this.statusLabel.setText(message);
     }
-        
+
     public static StatusBar addStatusbar(JFrame frame) {
-    	var statusBar = new StatusBar(frame.getWidth(), 16);
-    	statusBar.statusLabel = new JLabel("status");
-    	statusBar.statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    	statusBar.add(statusBar.statusLabel);
-    	frame.getContentPane().add(statusBar, java.awt.BorderLayout.SOUTH);
-    	return statusBar;
+        var statusBar = new StatusBar(frame.getWidth(), 16);
+        statusBar.statusLabel = new JLabel("status");
+        statusBar.statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        statusBar.add(statusBar.statusLabel);
+        frame.getContentPane().add(statusBar, java.awt.BorderLayout.SOUTH);
+        return statusBar;
     }
-    
+
 }
