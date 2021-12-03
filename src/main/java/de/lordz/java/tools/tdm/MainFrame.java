@@ -291,10 +291,17 @@ public class MainFrame extends JFrame {
 			String databasePath = "Q:\\Java\\IDE\\data\\tdm.db"; // todo: fallback for development versions, replace with dev configuration file read later
 			if (result == JFileChooser.APPROVE_OPTION) {
 				databasePath = fileChooser.getSelectedFile().toString();			
+	        } else {
+	        	if (!new java.io.File(databasePath).exists()) {
+	        		databasePath = null;;
+	        		JOptionPane.showMessageDialog(this, "Database does not exist!", LocalizationProvider.GetString("mainframe.menuitem.opendatabase"), JOptionPane.ERROR_MESSAGE);
+	        	}
 	        }
 			
-			openDatabaseAsync(databasePath, this.statusBar);
-			reloadCustomersTable();
+			if (!Strings.isNullOrEmpty(databasePath)) {
+				openDatabaseAsync(databasePath, this.statusBar);
+				reloadCustomersTable();
+			}
 		}
 		catch (Exception ex) {
 			Logger.Log(ex);

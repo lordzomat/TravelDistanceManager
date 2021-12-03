@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre">
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-16">
 		<attributes>
 			<attribute name="module" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/EclipseLink 2.5.2">
@@ -11,12 +17,17 @@
 			<attribute name="owner.project.facets" value="jpt.jpa"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="Q:/Java/IDE/3rdParty/sqlite-jdbc-3.36.0.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/guava-31.0.1-jre.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/flatlaf-1.6.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/flatlaf-intellij-themes-1.6.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-swing-1.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-font_awesome-4.7.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/lordz/eclipse-workspace/TravelDistanceManager/3rdParty/jiconfont-1.0.0.jar"/>
-	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="test" value="true"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
