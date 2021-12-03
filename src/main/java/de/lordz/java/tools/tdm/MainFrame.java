@@ -324,7 +324,7 @@ public class MainFrame extends JFrame {
 	
 	private void openDatabase(String databasePath) {
 		try {
-			if (!Strings.isNullOrEmpty(databasePath) && new java.io.File(databasePath).exists()) {
+			if (!Strings.isNullOrEmpty(databasePath)) {
 				if (DatabaseProvider.getIsOpen()) {
 					DatabaseProvider.closeDatabase();
 				}

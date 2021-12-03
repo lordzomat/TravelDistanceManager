@@ -17,5 +17,5 @@ public final class AppConstants {
 	/**
 	 * The application version (major, minor, build, revision).
 	 */
-	public static final String ApplicationVersion = "0.1.0.1";
+	public static final String ApplicationVersion = "0.1.0.2";
 }
