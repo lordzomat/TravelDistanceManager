@@ -372,7 +372,8 @@ public class MainFrame extends JFrame {
 			} else {
 				var message = String.format(LocalizationProvider.getString("mainframe.message.confirmcustomerdelete"), entity.getName());
 				if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
-					DatabaseProvider.removeEntity(entity);
+					entity.setDeleted();
+					DatabaseProvider.updateEntity(entity);
 					reloadCustomersTable();
 				}
 			}

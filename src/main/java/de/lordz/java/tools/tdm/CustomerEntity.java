@@ -102,4 +102,8 @@ public class CustomerEntity {
 	public void setDistance(double distance) {
 		this.distance = distance;		
 	}
+	
+	public void setDeleted() {
+		this.deleted = 1;
+	}
 }
