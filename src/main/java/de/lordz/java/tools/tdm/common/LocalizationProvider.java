@@ -3,6 +3,10 @@ package de.lordz.java.tools.tdm.common;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+
 /**
  * Class to provide localization and internationalization stuff.
  * 
@@ -13,7 +17,7 @@ import java.util.ResourceBundle;
 public class LocalizationProvider {
 
 	private static ResourceBundle activeBundle;
-//	private static Locale activeLocale;
+	private static Locale activeLocale;
 	
 	/**
 	 * Sets the locale.
@@ -31,8 +35,18 @@ public class LocalizationProvider {
 	 * @param locale The locale to set.
 	 */
 	public static void setLocale(Locale locale) {
-//		activeLocale = locale;
+		activeLocale = locale;
 		activeBundle = ResourceBundle.getBundle("de.lordz.java.tools.tdm.i18n.UiMessages", locale);
+		JOptionPane.setDefaultLocale(locale);
+		JFileChooser.setDefaultLocale(locale);
+		UIManager.getDefaults().addResourceBundle("de.lordz.java.tools.tdm.i18n.ControlMessages");
+	}
+	
+	/**
+	 * Retrieves the current locale.
+	 */
+	public static Locale getLocale() {
+		return activeLocale;
 	}
 	
 	/**

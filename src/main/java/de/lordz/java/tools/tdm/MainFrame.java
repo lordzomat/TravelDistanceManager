@@ -66,7 +66,7 @@ public class MainFrame extends JFrame {
 //		UIManager.put("TitlePane.menuBarEmbedded", false);
 		FlatLightLaf.updateUI();
 		IconFontSwing.register(FontAwesome.getIconFont());
-		LocalizationProvider.setLocale("de", "DE");
+		setLocale("de", "DE");
 	    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run() {
 	            DatabaseProvider.closeDatabase();
@@ -308,7 +308,7 @@ public class MainFrame extends JFrame {
 		try {
 			final var fileChooser = new JFileChooser();
 			fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-			var filter = new FileNameExtensionFilter("Database file", "db");
+			var filter = new FileNameExtensionFilter(LocalizationProvider.getString("mainframe.filechooser.databasefile"), "db");
 			fileChooser.setFileFilter(filter);
 			fileChooser.setAcceptAllFileFilterUsed(false);
 			int result = fileChooser.showOpenDialog(this);
@@ -365,15 +365,19 @@ public class MainFrame extends JFrame {
 	}
 	
 	private void processCustomerEditDeleteClick(boolean edit) {
-		if (edit) {
-			var entity = getSelectedCustomerEntity();
-			if (entity != null) {
-				openCustomerDialog(entity);
+		var entity = getSelectedCustomerEntity();
+		if (entity != null && entity.getId() > 0) {
+			if (edit) {
+					openCustomerDialog(entity);
 			} else {
-				// todo: show dialog, no customer selected
+				var message = String.format(LocalizationProvider.getString("mainframe.message.confirmcustomerdelete"), entity.getName());
+				if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
+					DatabaseProvider.removeEntity(entity);
+					reloadCustomersTable();
+				}
 			}
 		} else {
-			// todo: implement
+			showErrorMessage(LocalizationProvider.getString("mainframe.message.nocustomerselected"));
 		}
 	}
 	
@@ -456,6 +460,14 @@ public class MainFrame extends JFrame {
 		} catch (Exception ex) {
 			Logger.Log(ex);
 		}
+	}
+	
+	private boolean askForConfirmation(String message, String title) {
+		return JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+	}
+	
+	private static void setLocale(String language, String country) {
+		LocalizationProvider.setLocale(language, country);
 	}
 	
 	private class ThemeEntry {

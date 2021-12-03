@@ -52,7 +52,6 @@ public final class DatabaseProvider {
 						persistenceMap.put("javax.persistence.jdbc.driver", "org.sqlite.JDBC");
 			
 						factoryInstance = Persistence.createEntityManagerFactory("TravelDistanceManager", persistenceMap);
-		//		    System.out.println("Is opened connection :: "+ factoryInstance.createEntityManager().isOpen());
 					if (ensureDatabaseIsCreated()) {
 						isOpen.set(true);
 						result = true;
@@ -60,17 +59,6 @@ public final class DatabaseProvider {
 					} else {
 						Logger.LogError("Checking database '%s' failed!", databasePath);
 					}
-				    
-		//		    var entityMananger = factory.createEntityManager();
-		//		    if (entityMananger != null) {
-				    	//createDatabase(entityMananger);
-		//		    	entityMananger.getTransaction().begin();  
-		//		    	var customer = new CustomerEntity("Verein1", 10.5f);
-		//		    	entityMananger.persist(customer);
-		//		    	entityMananger.getTransaction().commit();
-		//		    	entityMananger.close();
-		//		    	factory.close(); 	
-		//		    }
 				} else {
 					Logger.LogError("No database path provided");
 				}
@@ -92,6 +80,12 @@ public final class DatabaseProvider {
 		return isOpen.get();
 	}
 	
+	/**
+	 * Saves the entity.
+	 * 
+	 * @param entity The entity to save.
+	 * @return Returns true on success, otherwise false.
+	 */
 	public static boolean saveEntity(Object entity) {
 		boolean result = false;
 		try {
@@ -118,6 +112,12 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
+	/**
+	 * Updates the entity.
+	 * 
+	 * @param entity The entity to update.
+	 * @return Returns true on success, otherwise false.
+	 */
 	public static boolean updateEntity(Object entity) {
 		boolean result = false;
 		try {
@@ -144,6 +144,47 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
+	/**
+	 * Removes the entity.
+	 * 
+	 * @param entity The entity to remove.
+	 * @return Returns true on success, otherwise false.
+	 */
+	public static boolean removeEntity(Object entity) {
+		boolean result = false;
+		try {
+			if (!isOpen.get()) {
+				return result;
+			}
+			
+			synchronized(lockObject) {
+				final var manager = createEntityManager();
+				if (manager != null) {
+					var transaction = manager.getTransaction();					
+					transaction.begin();
+					manager.remove(manager.merge(entity));
+					transaction.commit();
+					manager.close();
+					result = true;
+				}
+			}
+		}
+		catch (Exception ex) {
+			Logger.Log(ex);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Retrieves a entity using the specified JPA query.
+	 * 
+	 * @param <T> The type of the query.
+	 * @param query The query itself.
+	 * @param entityClass The entity class.
+	 * @param parameters The parameters to pass to the query.
+	 * @return Returns the entity on success, otherwise null.
+	 */
 	@SafeVarargs
 	public static <T> T getEntity(String query, Class<T> entityClass, AbstractMap.SimpleEntry<String, Object>... parameters) {
 		T result = null;
@@ -173,6 +214,14 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
+	/**
+	 * Retrieves entities using the specified JPA query.
+	 * 
+	 * @param <T> The type of the entity.
+	 * @param query The query itself.
+	 * @param entityClass The entity class.
+	 * @return Returns a list of entities on success, otherwise null.
+	 */
 	public static <T> List<T> getEntities(String query, Class<T> entityClass) {
 		List<T> result = null;
 		EntityManager manager = null;
@@ -195,12 +244,23 @@ public final class DatabaseProvider {
 		return result;
 	}
 	
+	/**
+	 * Retrieves the current date time in ISO 8601 format including fractions.
+	 * 
+	 * @return The ISO 8201 date time string.
+	 */
 	public static String getIsoDateTime() {
 		var date = new Date(System.currentTimeMillis());
 		var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		return dateFormat.format(date);
 	}
 	
+	/**
+	 * Converts a ISO 8601 date time string to a Date object.
+	 * 
+	 * @param timestamp The timestamp to convert.
+	 * @return The Date object.
+	 */
 	public static Date getDateFromIsoDateTime(String timestamp) {
 		try {
 			var simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
