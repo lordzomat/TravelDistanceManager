@@ -59,5 +59,10 @@
     	<artifactId>guava</artifactId>
     	<version>31.0.1-jre</version>
 	</dependency>
+	<dependency>
+    	<groupId>org.eclipse.persistence</groupId>
+    	<artifactId>eclipselink</artifactId>
+    	<version>2.5.2</version>
+	</dependency>
   </dependencies>
 </project>
