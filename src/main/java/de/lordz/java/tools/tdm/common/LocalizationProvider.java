@@ -1,6 +1,7 @@
 package de.lordz.java.tools.tdm.common;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.JFileChooser;
@@ -56,6 +57,12 @@ public class LocalizationProvider {
      * @return Returns the text in it's localized form.
      */
     public static String getString(String key) {
-        return activeBundle.getString(key);
+        try {
+            return activeBundle.getString(key);
+        } catch (MissingResourceException ex) {
+            Logger.Log(ex);
+        }
+        
+        return key;
     }
 }

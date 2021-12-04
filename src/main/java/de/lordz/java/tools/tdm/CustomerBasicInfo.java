@@ -21,9 +21,9 @@ import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 
 /**
- * Panel to handel basic customer info.
+ * Panel to handle basic customer info.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class CustomerBasicInfo extends JPanel {
@@ -34,7 +34,6 @@ public class CustomerBasicInfo extends JPanel {
     private JTextField textFieldPostcode;
     private JTextField textFieldCity;
     private JTextField textFieldDistance;
-    private JScrollPane textAreaScrollPane;
     private JTextArea textAreaDescription;
     private CustomerEntity currentCustomer;
     private boolean editMode;
@@ -110,18 +109,18 @@ public class CustomerBasicInfo extends JPanel {
         springLayout.putConstraint(SpringLayout.WEST, labelDescription, 0, SpringLayout.WEST, labelName);
         add(labelDescription);
 
-        textAreaScrollPane = new JScrollPane();
+        var textAreaScrollPane = new JScrollPane();
         springLayout.putConstraint(SpringLayout.SOUTH, textAreaScrollPane, -10, SpringLayout.SOUTH, this);
         this.textAreaDescription = new JTextArea();
-        this.textAreaScrollPane.setViewportView(this.textAreaDescription);
-        springLayout.putConstraint(SpringLayout.EAST, this.textAreaScrollPane, 192, SpringLayout.EAST,
+        textAreaScrollPane.setViewportView(this.textAreaDescription);
+        springLayout.putConstraint(SpringLayout.EAST, textAreaScrollPane, 192, SpringLayout.EAST,
                 this.textFieldDistance);
-        springLayout.putConstraint(SpringLayout.NORTH, this.textAreaScrollPane, 6, SpringLayout.SOUTH,
+        springLayout.putConstraint(SpringLayout.NORTH, textAreaScrollPane, 6, SpringLayout.SOUTH,
                 this.textFieldDistance);
-        springLayout.putConstraint(SpringLayout.WEST, this.textAreaScrollPane, 0, SpringLayout.WEST,
+        springLayout.putConstraint(SpringLayout.WEST, textAreaScrollPane, 0, SpringLayout.WEST,
                 this.textFieldDistance);
         this.textAreaDescription.setColumns(10);
-        add(this.textAreaScrollPane);
+        add(textAreaScrollPane);
     }
 
     /**
@@ -152,11 +151,9 @@ public class CustomerBasicInfo extends JPanel {
             this.textFieldCity.getDocument().addDocumentListener(
                     new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setCity(value)));
             this.textFieldDistance.getDocument()
-                    .addDocumentListener(new EntityTextChangeDocumentListener((value) -> UpdateDistance(value)));
+                    .addDocumentListener(new EntityTextChangeDocumentListener((value) -> updateDistance(value)));
             this.textAreaDescription.getDocument().addDocumentListener(
                     new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setDescription(value)));
-        } else {
-
         }
     }
 
@@ -181,7 +178,7 @@ public class CustomerBasicInfo extends JPanel {
                 .setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
     }
 
-    private void UpdateDistance(String value) {
+    private void updateDistance(String value) {
         if (!Strings.isNullOrEmpty(value)) {
             value = value.replace(',', '.');
             this.currentCustomer.setDistance(Double.parseDouble(value));

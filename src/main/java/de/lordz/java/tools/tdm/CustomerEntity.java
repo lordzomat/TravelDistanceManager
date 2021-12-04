@@ -33,18 +33,6 @@ public class CustomerEntity {
     @Column(name = "coDeleted", nullable = false)
     private int deleted;
 
-//	CREATE TABLE IF NOT EXISTS tbCustomers (coId INTEGER PRIMARY KEY, coName TEXT NOT NULL, coStreet TEXT, coPostcode TEXT, coCity TEXT, coDistance REAL, coDescription TEXT);
-//	public CustomerEntity(String name, Double distance) {
-//		super();
-//		//this.id = id;
-//		this.name = name;
-//		this.distance = distance;
-//	}
-
-//	public CustomerEntity() {
-//		super();
-//	}
-
     public Integer getId() {
         return id;
     }
@@ -103,5 +91,9 @@ public class CustomerEntity {
 
     public void setDeleted() {
         this.deleted = 1;
+    }
+        
+    public String toString() {
+        return this.name;
     }
 }

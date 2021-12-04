@@ -1,9 +1,7 @@
 package de.lordz.java.tools.tdm;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,12 +13,13 @@ import javax.persistence.TypedQuery;
 
 import com.google.common.base.Strings;
 
+import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.Logger;
 
 /**
  * Provides access to the applications database using a EntityManagerFactory.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public final class DatabaseProvider {
@@ -236,36 +235,6 @@ public final class DatabaseProvider {
         return result;
     }
 
-    /**
-     * Retrieves the current date time in ISO 8601 format including fractions.
-     * 
-     * @return The ISO 8201 date time string.
-     */
-    public static String getIsoDateTime() {
-        var date = new Date(System.currentTimeMillis());
-        var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        return dateFormat.format(date);
-    }
-
-    /**
-     * Converts a ISO 8601 date time string to a Date object.
-     * 
-     * @param timestamp The timestamp to convert.
-     * @return The Date object.
-     */
-    public static Date getDateFromIsoDateTime(String timestamp) {
-        try {
-            var simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-            return simpleDateFormat.parse(timestamp);
-        } catch (Exception ex) {
-            Logger.Log(ex);
-        }
-
-        return null;
-//		var temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(timestamp); 
-//	    return Date.from(Instant.from(temporalAccessor));
-    }
-
     private static boolean ensureDatabaseIsCreated() {
         boolean result = false;
         try {
@@ -311,7 +280,7 @@ public final class DatabaseProvider {
                     if ((int) historyResult == 0) {
                         query = manager.createNativeQuery(
                                 "INSERT INTO tbDatabaseHistory (coTimestamp, coDescription) VALUES(?1, ?2)");
-                        query.setParameter(1, getIsoDateTime());
+                        query.setParameter(1, DateTimeHelper.getIsoDateTime());
                         query.setParameter(2, "Database created");
                         query.executeUpdate();
                     }

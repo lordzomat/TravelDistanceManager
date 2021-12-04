@@ -17,9 +17,11 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.AppConstants;
+import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.config.AppConfiguration;
+import de.lordz.java.tools.tdm.entities.TripEntity;
 
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -29,6 +31,7 @@ import javax.swing.JOptionPane;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -51,12 +54,19 @@ public class MainFrame extends JFrame {
     private JPanel contentPane;
     private StatusBar statusBar;
     private JTable tableCustomers;
+    private JTable tableTrips;
     private HashMap<Integer, EntityDataModelHelper<CustomerEntity>> customersColumnMap = createCustomersColumnMap();
+    private HashMap<Integer, EntityDataModelHelper<TripEntity>> tripsColumnMap = createTripsColumnMap();
     private JButton buttonNewCustomer;
     private JButton buttonEditCustomer;
     private JButton buttonDeleteCustomer;
+    private JButton buttonNewTrip;
+    private JButton buttonEditTrip;
+    private JButton buttonDeleteTrip;
     private JMenu fileMenuRecentDatabases;
+    private HashMap<Integer, CustomerEntity> currentCustomers;
     private CustomerBasicInfo customerBasicInfo;
+    private TripBasicInfo tripBasicInfo;
 
     /**
      * Launch the application.
@@ -136,32 +146,26 @@ public class MainFrame extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         panel.add(tabbedPane, BorderLayout.CENTER);
 
+        /*** Customers ****/
+        
         JPanel panelCustomers = new JPanel();
         panelCustomers.setLayout(new BorderLayout(0, 0));
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), panelCustomers,
                 LocalizationProvider.getString("mainframe.button.tooltip.customers"));
 
-        JPanel panelTrips = new JPanel();
-        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray), panelTrips,
-                LocalizationProvider.getString("mainframe.button.tooltip.trips"));
+        JScrollPane scrollPaneCustomers = new JScrollPane();
+        panelCustomers.add(scrollPaneCustomers, BorderLayout.WEST);
 
-        JPanel panelReport = new JPanel();
-        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport,
-                LocalizationProvider.getString("mainframe.button.tooltip.report"));
-
-        JScrollPane scrollPane = new JScrollPane();
-        panelCustomers.add(scrollPane, BorderLayout.WEST);
-
-        tableCustomers = new JTable();
+        this.tableCustomers = new JTable();
 //		tableCustomers.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tableCustomers.setShowGrid(true);
-        tableCustomers.setColumnSelectionAllowed(false);
-        tableCustomers.setDragEnabled(false);
-        tableCustomers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tableCustomers.getTableHeader().setReorderingAllowed(false);
-        tableCustomers.getSelectionModel().addListSelectionListener(e -> processTableCustomerSelectionChanged(e));
-        scrollPane.setViewportView(tableCustomers);
-        scrollPane.setPreferredSize(new Dimension(400, 100));
+        this.tableCustomers.setShowGrid(true);
+        this.tableCustomers.setColumnSelectionAllowed(false);
+        this.tableCustomers.setDragEnabled(false);
+        this.tableCustomers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.tableCustomers.getTableHeader().setReorderingAllowed(false);
+        this.tableCustomers.getSelectionModel().addListSelectionListener(e -> processTableCustomerSelectionChanged(e));
+        scrollPaneCustomers.setViewportView(this.tableCustomers);
+        scrollPaneCustomers.setPreferredSize(new Dimension(400, 100));
 
         JPanel panelCustomersRight = new JPanel();
         panelCustomers.add(panelCustomersRight, BorderLayout.CENTER);
@@ -170,8 +174,7 @@ public class MainFrame extends JFrame {
         JToolBar toolBar = new JToolBar();
         panelCustomersRight.add(toolBar, BorderLayout.NORTH);
 
-        this.buttonNewCustomer = new JButton(
-                IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
+        this.buttonNewCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
         this.buttonNewCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
         this.buttonNewCustomer.addActionListener(e -> openCustomerDialog(null));
         toolBar.add(this.buttonNewCustomer);
@@ -181,8 +184,7 @@ public class MainFrame extends JFrame {
         this.buttonEditCustomer.addActionListener(e -> processCustomerEditDeleteClick(true));
         toolBar.add(this.buttonEditCustomer);
 
-        this.buttonDeleteCustomer = new JButton(
-                IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
+        this.buttonDeleteCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
         this.buttonDeleteCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.delete"));
         this.buttonDeleteCustomer.addActionListener(e -> processCustomerEditDeleteClick(false));
         toolBar.add(this.buttonDeleteCustomer);
@@ -203,10 +205,69 @@ public class MainFrame extends JFrame {
                 panelCustomerInfo);
         panelCustomerInfo.add(this.customerBasicInfo);
         this.customerBasicInfo.setEditable(false);
+        
+        /*** Trips ****/
+        
+        JPanel panelTrips = new JPanel();
+        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray), panelTrips,
+                LocalizationProvider.getString("mainframe.button.tooltip.trips"));
+        panelTrips.setLayout(new BorderLayout(0, 0));
+        
+        JScrollPane scrollPaneTrips = new JScrollPane();
+        panelTrips.add(scrollPaneTrips, BorderLayout.WEST);
+        this.tableTrips = new JTable();
+        this.tableTrips.setShowGrid(true);
+        this.tableTrips.setColumnSelectionAllowed(false);
+        this.tableTrips.setDragEnabled(false);
+        this.tableTrips.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.tableTrips.getTableHeader().setReorderingAllowed(false);
+        this.tableTrips.getSelectionModel().addListSelectionListener(e -> processTableTripsSelectionChanged(e));
+        scrollPaneTrips.setViewportView(this.tableTrips);
+        scrollPaneTrips.setPreferredSize(new Dimension(400, 100));
+        
+        JPanel panelTripsRight = new JPanel();
+        panelTrips.add(panelTripsRight, BorderLayout.CENTER);
+        panelTripsRight.setLayout(new BorderLayout(0, 0));
+        
+        JToolBar toolBarTrips = new JToolBar();
+        panelTripsRight.add(toolBarTrips, BorderLayout.NORTH);
+        
+        this.buttonNewTrip = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
+        this.buttonNewTrip.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
+        this.buttonNewTrip.addActionListener(e -> openTripDialog(null));
+        toolBarTrips.add(this.buttonNewTrip);
+        
+        this.buttonEditTrip = new JButton(IconFontSwing.buildIcon(FontAwesome.PENCIL_SQUARE, 20, Color.ORANGE));
+        this.buttonEditTrip.setToolTipText(LocalizationProvider.getString("mainframe.button.edit"));
+        this.buttonEditTrip.addActionListener(e -> processTripEditDeleteClick(true));
+        toolBarTrips.add(this.buttonEditTrip);
+        
+        this.buttonDeleteTrip = new JButton(IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
+        this.buttonDeleteTrip.setToolTipText(LocalizationProvider.getString("mainframe.button.delete"));
+        this.buttonDeleteTrip.addActionListener(e -> processTripEditDeleteClick(false));
+        toolBarTrips.add(this.buttonDeleteTrip);
+        
+        JPanel panelTripsInfo = new JPanel();
+        panelTripsRight.add(panelTripsInfo, BorderLayout.CENTER);
+        panelTripsInfo.setLayout(null);
+        
+        this.tripBasicInfo = new TripBasicInfo();
+        this.tripBasicInfo.setBounds(10, 11, 559, 298);
+        this.tripBasicInfo.setEditable(false);
+        panelTripsInfo.add(this.tripBasicInfo);
+        
+        /*** Reports ****/
+        
+        JPanel panelReport = new JPanel();
+        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport,
+                LocalizationProvider.getString("mainframe.button.tooltip.report"));
+        
+        /*** Common ****/
 
         this.statusBar = StatusBar.addStatusbar(this);
         this.statusBar.setStatusMessage(LocalizationProvider.getString("mainframe.statusbar.nodatabaseopen"));
         setActionButtonsEnabledState(false);
+        setTripActionButtonsEnabledState(false);
 
         this.appConfiguration = AppConfiguration.loadAppConfiguration();
         if (this.appConfiguration != null) {
@@ -215,7 +276,7 @@ public class MainFrame extends JFrame {
             }
         }
 
-        reloadRecentDatabseMenu();
+        reloadRecentDatabaseMenu();
     }
 
     private void openCustomerDialog(CustomerEntity entity) {
@@ -274,6 +335,12 @@ public class MainFrame extends JFrame {
         this.buttonNewCustomer.setEnabled(enaled);
         this.buttonEditCustomer.setEnabled(enaled);
         this.buttonDeleteCustomer.setEnabled(enaled);
+    }
+    
+    private void setTripActionButtonsEnabledState(boolean enaled) {
+        this.buttonNewTrip.setEnabled(enaled);
+        this.buttonEditTrip.setEnabled(enaled);
+        this.buttonDeleteTrip.setEnabled(enaled);
     }
 
     private void openDatabaseAsync(String databasePath, StatusBar statusBar) {
@@ -342,6 +409,7 @@ public class MainFrame extends JFrame {
 
                 openDatabaseAsync(databasePath, this.statusBar);
                 reloadCustomersTable();
+                reloadTripTable();
             }
         } catch (Exception ex) {
             Logger.Log(ex);
@@ -354,14 +422,19 @@ public class MainFrame extends JFrame {
         }
 
         var customers = CustomerManager.getCustomers();
-        tableCustomers.setModel(new EntityTableModel<CustomerEntity>(customers, this.customersColumnMap));
-        var columnModel = tableCustomers.getColumnModel();
-        if (columnModel != null && columnModel.getColumnCount() > 2) {
-            var columnDistance = columnModel.getColumn(2);
-            if (columnDistance != null) {
-                columnDistance.setMaxWidth(100);
-                columnDistance.setMinWidth(100);
-                columnDistance.setCellRenderer(rightTableCellRenderer);
+        this.currentCustomers = createCustomersHashMap(customers);
+        if (customers != null) {
+            setTripActionButtonsEnabledState(customers.size() > 0);
+            this.tripBasicInfo.setCustomers(customers);
+            this.tableCustomers.setModel(new EntityTableModel<CustomerEntity>(customers, this.customersColumnMap));
+            var columnModel = this.tableCustomers.getColumnModel();
+            if (columnModel != null && columnModel.getColumnCount() > 2) {
+                var columnDistance = columnModel.getColumn(2);
+                if (columnDistance != null) {
+                    columnDistance.setMaxWidth(100);
+                    columnDistance.setMinWidth(100);
+                    columnDistance.setCellRenderer(rightTableCellRenderer);
+                }
             }
         }
     }
@@ -398,7 +471,7 @@ public class MainFrame extends JFrame {
         CustomerEntity entity = null;
         var selectedRowIndex = this.tableCustomers.getSelectedRow();
         if (selectedRowIndex >= 0) {
-            var currentModel = tableCustomers.getModel();
+            var currentModel = this.tableCustomers.getModel();
             if (currentModel != null && currentModel instanceof EntityTableModel) {
                 var entityTableModel = (EntityTableModel<CustomerEntity>) currentModel;
                 if (entityTableModel != null) {
@@ -457,14 +530,14 @@ public class MainFrame extends JFrame {
                 }
 
                 saveConfiguration();
-                reloadRecentDatabseMenu();
+                reloadRecentDatabaseMenu();
             }
         } catch (Exception ex) {
             Logger.Log(ex);
         }
     }
 
-    private void reloadRecentDatabseMenu() {
+    private void reloadRecentDatabaseMenu() {
         try {
             var recentDatabases = this.appConfiguration.RecentDatabases;
             if (recentDatabases != null) {
@@ -486,6 +559,118 @@ public class MainFrame extends JFrame {
 
     private static void setLocale(String language, String country) {
         LocalizationProvider.setLocale(language, country);
+    }
+    
+    private HashMap<Integer, EntityDataModelHelper<TripEntity>> createTripsColumnMap() {
+        HashMap<Integer, EntityDataModelHelper<TripEntity>> columnMap = new HashMap<Integer, EntityDataModelHelper<TripEntity>>();
+        columnMap.put(0, new EntityDataModelHelper<TripEntity>(
+                LocalizationProvider.getString("tripbasicinfo.label.date"), (entity) -> DateTimeHelper.toDisplayDateFormat(entity.getLocalDate())));
+        columnMap.put(1, new EntityDataModelHelper<TripEntity>(
+                LocalizationProvider.getString("tripbasicinfo.label.time"), (entity) -> DateTimeHelper.toDisplayShortTimeFormat(entity.getLocalTime())));
+        columnMap.put(2, new EntityDataModelHelper<TripEntity>(
+                LocalizationProvider.getString("tripbasicinfo.label.customer"), (entity) -> lookupCustomerName(entity.getCustomerId())));
+        return columnMap;
+    }
+    
+    private String lookupCustomerName(int customerId) {
+        var customers = this.currentCustomers;       
+        if (customers != null && customers.containsKey(customerId)) {
+            var customer = customers.get(customerId);
+            if (customer != null) {
+                return customer.getName();
+            }            
+        }
+        
+        return "";
+    }
+    
+    private void openTripDialog(TripEntity entity) {
+        var tripDialog = new TripDialog(this.currentCustomers.values());
+        tripDialog.showDialog(entity, this);
+        reloadTripTable();
+    }
+   
+    private void reloadTripTable() {
+        if (!DatabaseProvider.getIsOpen()) {
+            return;
+        }
+
+        var trips = TripManager.getTrips();    
+        this.tableTrips.setModel(new EntityTableModel<TripEntity>(trips, this.tripsColumnMap));
+        var columnModel = this.tableTrips.getColumnModel();
+        if (columnModel != null && columnModel.getColumnCount() > 1) {
+            var columnDate = columnModel.getColumn(0);
+            if (columnDate != null) {
+                columnDate.setMaxWidth(80);
+                columnDate.setMinWidth(80);
+            }
+            
+            var columnTime = columnModel.getColumn(1);
+            if (columnTime != null) {
+                columnTime.setMaxWidth(60);
+                columnTime.setMinWidth(60);
+            }
+        }
+    }
+    
+    private void processTableTripsSelectionChanged(ListSelectionEvent event) {
+        if (event != null && event.getValueIsAdjusting()) {
+            return;
+        }
+
+        var entity = getSelectedTripEntity();
+        this.tripBasicInfo.fillFromEnity((entity == null ? new TripEntity() : entity));
+    }
+    
+    private TripEntity getSelectedTripEntity() {
+        TripEntity entity = null;
+        var selectedRowIndex = this.tableTrips.getSelectedRow();
+        if (selectedRowIndex >= 0) {
+            var currentModel = this.tableTrips.getModel();
+            if (currentModel != null && currentModel instanceof EntityTableModel) {
+                var entityTableModel = (EntityTableModel<TripEntity>)currentModel;
+                if (entityTableModel != null) {
+                    entity = entityTableModel.getEntity(selectedRowIndex);
+                }
+            }
+        }
+
+        return entity;
+    }
+    
+    private void processTripEditDeleteClick(boolean edit) {
+        var entity = getSelectedTripEntity();
+        if (entity != null && entity.getId() > 0) {
+            if (edit) {
+                openTripDialog(entity);
+            } else {
+                var message = String.format(LocalizationProvider.getString("mainframe.message.confirmtripdelete"), 
+                        DateTimeHelper.toDisplayDateFormat(entity.getLocalDate()), 
+                        DateTimeHelper.toDisplayShortTimeFormat(entity.getLocalTime()));
+                if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
+                    entity.setDeleted();
+                    DatabaseProvider.updateEntity(entity);
+                    reloadTripTable();
+                }
+            }
+        } else {
+            showErrorMessage(LocalizationProvider.getString("mainframe.message.notripselected"));
+        }
+    }
+    
+    private HashMap<Integer, CustomerEntity> createCustomersHashMap(List<CustomerEntity> customers) {
+        if (customers != null) {
+            var hashMap = new HashMap<Integer, CustomerEntity>(customers.size());
+            for (var customer : customers) {
+                if (customer != null) {
+                    hashMap.put(customer.getId(), customer);
+                }
+            }
+            
+            return hashMap;
+        }
+        
+        return new HashMap<Integer, CustomerEntity>(0);
     }
 
     private class ThemeEntry {

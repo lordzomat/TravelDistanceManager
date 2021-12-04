@@ -5,33 +5,36 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
+
 import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
+import de.lordz.java.tools.tdm.entities.TripEntity;
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;
 
-public class CustomerDialog extends JDialog {
+public class TripDialog extends JDialog {
 
     private static final long serialVersionUID = -3335942655314531982L;
     private final JPanel contentPanel = new JPanel();
     private JButton buttonOk;
-    private CustomerEntity currentCustomer;
-    private CustomerBasicInfo customerBasicInfo;
+    private TripEntity currentTrip;
+    private TripBasicInfo tripBasicInfo;
     private boolean dataSaved;
 
     /**
      * Create the dialog.
      */
-    public CustomerDialog() {
-        setBounds(100, 100, 450, 350);
+    public TripDialog(Collection<CustomerEntity> customers) {
+        setBounds(100, 100, 450, 412);
         setResizable(false);
         setIconImage(IconFontSwing.buildImage(FontAwesome.USERS, 15, Color.lightGray));
         getContentPane().setLayout(new BorderLayout());
@@ -39,13 +42,14 @@ public class CustomerDialog extends JDialog {
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         var springLayout = new SpringLayout();
         contentPanel.setLayout(springLayout);
-        this.customerBasicInfo = new CustomerBasicInfo();
-        this.customerBasicInfo.setEditable(true);
-        springLayout.putConstraint(SpringLayout.SOUTH, customerBasicInfo, 263, SpringLayout.NORTH, contentPanel);
-        springLayout.putConstraint(SpringLayout.NORTH, this.customerBasicInfo, 5, SpringLayout.NORTH, contentPanel);
-        springLayout.putConstraint(SpringLayout.WEST, this.customerBasicInfo, 5, SpringLayout.WEST, contentPanel);
-        springLayout.putConstraint(SpringLayout.EAST, customerBasicInfo, 419, SpringLayout.WEST, contentPanel);
-        contentPanel.add(this.customerBasicInfo);
+        this.tripBasicInfo= new TripBasicInfo();
+        springLayout.putConstraint(SpringLayout.SOUTH, tripBasicInfo, 315, SpringLayout.NORTH, contentPanel);
+        this.tripBasicInfo.setCustomers(customers);
+        this.tripBasicInfo.setEditable(true);
+        springLayout.putConstraint(SpringLayout.NORTH, this.tripBasicInfo, 5, SpringLayout.NORTH, contentPanel);
+        springLayout.putConstraint(SpringLayout.WEST, this.tripBasicInfo, 5, SpringLayout.WEST, contentPanel);
+        springLayout.putConstraint(SpringLayout.EAST, this.tripBasicInfo, 419, SpringLayout.WEST, contentPanel);
+        contentPanel.add(this.tripBasicInfo);
 
         {
             JPanel buttonPane = new JPanel();
@@ -67,11 +71,11 @@ public class CustomerDialog extends JDialog {
         }
     }
 
-    public boolean showDialog(CustomerEntity customer, java.awt.Window window) {
-        String titleKey = customer == null ? "customerdialog.title.new" : "customerdialog.title.edit";
+    public boolean showDialog(TripEntity trip, java.awt.Window window) {
+        String titleKey = trip == null ? "tripbasicinfo.title.new" : "tripbasicinfo.title.edit";
         try {
-            this.currentCustomer = customer != null ? customer : new CustomerEntity();
-            this.customerBasicInfo.fillFromEnity(this.currentCustomer);
+            this.currentTrip = trip != null ? trip : new TripEntity();
+            this.tripBasicInfo.fillFromEnity(this.currentTrip);
         } catch (Exception ex) {
             Logger.Log(ex);
         }
@@ -88,20 +92,20 @@ public class CustomerDialog extends JDialog {
         boolean closeDialog = true;
         var source = event.getSource();
         if (source != null && source == this.buttonOk) {
-            if (this.currentCustomer != null) {
-                if (Strings.isNullOrEmpty(this.currentCustomer.getName())) {
-                    showErrorMessage(LocalizationProvider.getString("customerdialog.message.namemissing"));
+            if (this.currentTrip != null) {
+                if (this.currentTrip.getCustomerId() == 0) {
+                    showErrorMessage(LocalizationProvider.getString("tripdialog.message.nocustomerselected"));
                     closeDialog = false;
-                } else if (this.currentCustomer.getDistance() <= 0.0) {
-                    showErrorMessage(LocalizationProvider.getString("customerdialog.message.distancemissing"));
+                } else if (Strings.isNullOrEmpty(this.currentTrip.getTimeOfTrip())) {
+                    showErrorMessage(LocalizationProvider.getString("tripdialog.message.nodatetimmeselected"));
                     closeDialog = false;
-                }
-
+                }                
+                
                 if (closeDialog) {
-                    if (this.currentCustomer.getId() > 0) {
-                        this.dataSaved = DatabaseProvider.updateEntity(this.currentCustomer);
+                    if (this.currentTrip.getId() > 0) {
+                        this.dataSaved = DatabaseProvider.updateEntity(this.currentTrip);
                     } else {
-                        this.dataSaved = DatabaseProvider.saveEntity(this.currentCustomer);
+                        this.dataSaved = DatabaseProvider.saveEntity(this.currentTrip);
                     }
                 }
             }
