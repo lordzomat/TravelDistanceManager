@@ -244,6 +244,11 @@ public final class DatabaseProvider {
         return result;
     }
     
+    /** Retrieves a single result using the specified native query.
+     * @param sqlQuery      The query itself.
+     * @param parameters    The parameters to use if present.
+     * @return              Returns the single result on success.
+     */
     public static Object getSqlSingleResult(String sqlQuery, Object... parameters) {
         Object result = null;
         EntityManager manager = null;

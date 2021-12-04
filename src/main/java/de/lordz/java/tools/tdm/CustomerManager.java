@@ -25,7 +25,7 @@ public class CustomerManager {
         try {
             if (DatabaseProvider.getIsOpen()) {
                 var parameter = new AbstractMap.SimpleEntry<String, Object>("customerId", id);
-                result = DatabaseProvider.getEntity("SELECT c FROM CustomerEntity c WHERE c.id=:customerId",
+                result = DatabaseProvider.getEntity("SELECT c FROM CustomerEntity c WHERE c.deleted=0 AND c.id=:customerId",
                         CustomerEntity.class, parameter);
             }
         } catch (Exception ex) {

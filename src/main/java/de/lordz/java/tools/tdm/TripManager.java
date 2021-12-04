@@ -25,7 +25,7 @@ public class TripManager {
         try {
             if (DatabaseProvider.getIsOpen()) {
                 var parameter = new AbstractMap.SimpleEntry<String, Object>("tripId", id);
-                result = DatabaseProvider.getEntity("SELECT t FROM TripEntity c WHERE t.id=:tripId",
+                result = DatabaseProvider.getEntity("SELECT t FROM TripEntity c WHERE t.deleted=0 AND t.id=:tripId",
                         TripEntity.class, parameter);
             }
         } catch (Exception ex) {
@@ -57,14 +57,15 @@ public class TripManager {
     public static boolean checkIsCustomerAssignd(int customerId) {
         boolean result = true;
         try {
-            var singleResult = DatabaseProvider.getSqlSingleResult("SELECT EXISTS (SELECT 1 FROM tbTrip WHERE coCustomerId=?1)", customerId);
+            var singleResult = DatabaseProvider
+                    .getSqlSingleResult("SELECT EXISTS (SELECT 1 FROM tbTrip WHERE coDeleted=0 AND coCustomerId=?1)", customerId);
             if (singleResult != null && singleResult instanceof Integer) {
-                result = (int)singleResult == 1;
+                result = (int) singleResult == 1;
             }
         } catch (Exception ex) {
             Logger.Log(ex);
         }
-        
+
         return result;
     }
 }
