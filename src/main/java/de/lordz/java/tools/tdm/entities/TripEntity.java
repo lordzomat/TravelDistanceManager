@@ -1,6 +1,7 @@
 package de.lordz.java.tools.tdm.entities;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
@@ -37,12 +38,9 @@ public class TripEntity {
     
     @Column(name = "coDeleted", nullable = false)
     private int deleted;
-    
+
     @Transient
-    private LocalDate localDate;
-    
-    @Transient
-    private LocalTime localTime;
+    private LocalDateTime localDateTime;
     
     public int getId() {
         return id;
@@ -81,20 +79,30 @@ public class TripEntity {
         this.deleted = 1;
     }
     
-    public LocalDate getLocalDate() {
-        if (this.localDate == null) {
+    public LocalDateTime getLocalDateTime() {
+        if (this.localDateTime == null) {
             setLocalDateAndTime();
         }
         
-        return this.localDate;
+        return this.localDateTime;
+    }
+    
+    public LocalDate getLocalDate() {
+        var dateTimeInstance = getLocalDateTime();
+        if (dateTimeInstance != null) {
+            return dateTimeInstance.toLocalDate();
+        }
+        
+        return null;
     }
     
     public LocalTime getLocalTime() {
-        if (this.localTime == null) {
-            setLocalDateAndTime();
+        var dateTimeInstance = getLocalDateTime();
+        if (dateTimeInstance != null) {
+            return dateTimeInstance.toLocalTime();
         }
         
-        return this.localTime;
+        return null;
     }
     
     private void setLocalDateAndTime() {
@@ -102,8 +110,7 @@ public class TripEntity {
             var date = DateTimeHelper.getDateFromIsoDateTime(this.timeOfTrip);
             if (date != null) {
                 var utcInstant = date.toInstant().atZone(ZoneId.of("UTC"));
-                this.localDate = utcInstant.toLocalDate();
-                this.localTime = utcInstant.toLocalTime();
+                this.localDateTime = utcInstant.toLocalDateTime();
             }
         }
     }

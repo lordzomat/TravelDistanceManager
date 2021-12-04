@@ -17,6 +17,7 @@ import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
+import de.lordz.java.tools.tdm.entities.CustomerEntity;
 import de.lordz.java.tools.tdm.entities.TripEntity;
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;

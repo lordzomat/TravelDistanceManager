@@ -3,7 +3,7 @@ package de.lordz.java.tools.tdm.common;
 /**
  * Application constants.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public final class AppConstants {
@@ -16,5 +16,5 @@ public final class AppConstants {
     /**
      * The application version (major, minor, build, revision).
      */
-    public static final String ApplicationVersion = "0.1.0.3";
+    public static final String ApplicationVersion = "0.1.0.4";
 }

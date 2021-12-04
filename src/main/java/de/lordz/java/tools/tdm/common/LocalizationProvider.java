@@ -12,7 +12,7 @@ import javax.swing.UIManager;
  * Class to provide localization and internationalization stuff.
  * 
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class LocalizationProvider {

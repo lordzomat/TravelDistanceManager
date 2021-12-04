@@ -21,6 +21,7 @@ import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.config.AppConfiguration;
+import de.lordz.java.tools.tdm.entities.CustomerEntity;
 import de.lordz.java.tools.tdm.entities.TripEntity;
 
 import javax.swing.JMenuBar;
@@ -363,11 +364,8 @@ public class MainFrame extends JFrame {
                         setActionButtonsEnabledState(false);
                         var messageTemplate = LocalizationProvider.getString("mainframe.error.opendatabase");
                         var message = String.format(messageTemplate, databasePath);
-                        JOptionPane.showMessageDialog(null, message,
-                                LocalizationProvider.getString("mainframe.menuitem.opendatabase"),
-                                JOptionPane.ERROR_MESSAGE);
-                        statusBar
-                                .setStatusMessage(LocalizationProvider.getString("mainframe.statusbar.nodatabaseopen"));
+                        showErrorMessage(message, LocalizationProvider.getString("mainframe.menuitem.opendatabase"));
+                        statusBar.setStatusMessage(LocalizationProvider.getString("mainframe.statusbar.nodatabaseopen"));
                     }
                 } catch (InterruptedException ignore) {
                 } catch (java.util.concurrent.ExecutionException ex) {
@@ -450,20 +448,26 @@ public class MainFrame extends JFrame {
 
     private void processCustomerEditDeleteClick(boolean edit) {
         var entity = getSelectedCustomerEntity();
+        var title = edit ? LocalizationProvider.getString("mainframe.button.edit")
+                : LocalizationProvider.getString("mainframe.button.delete");
         if (entity != null && entity.getId() > 0) {
             if (edit) {
                 openCustomerDialog(entity);
             } else {
-                var message = String.format(LocalizationProvider.getString("mainframe.message.confirmcustomerdelete"),
-                        entity.getName());
-                if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
-                    entity.setDeleted();
-                    DatabaseProvider.updateEntity(entity);
-                    reloadCustomersTable();
+                var message = String.format(LocalizationProvider.getString("mainframe.message.confirmcustomerdelete"), entity.getName());
+
+                if (askForConfirmation(message, title)) {
+                    if (!TripManager.checkIsCustomerAssignd(entity.getId())) {
+                        entity.setDeleted();
+                        DatabaseProvider.updateEntity(entity);
+                        reloadCustomersTable();
+                    } else {
+                        showErrorMessage(LocalizationProvider.getString("customerdialog.message.deletenotpossiblestillinuse"), title);
+                    }
                 }
             }
         } else {
-            showErrorMessage(LocalizationProvider.getString("mainframe.message.nocustomerselected"));
+            showErrorMessage(LocalizationProvider.getString("mainframe.message.nocustomerselected"), title);
         }
     }
 
@@ -511,9 +515,12 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, LocalizationProvider.getString("mainframe.menuitem.opendatabase"),
-                JOptionPane.ERROR_MESSAGE);
+    private void showErrorMessage(String message) { 
+        showErrorMessage(message, AppConstants.ApplicationName);
+    }
+    
+    private void showErrorMessage(String message, String title) {
+        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     private void addRecentDatabase(String databasePath) {
@@ -640,6 +647,8 @@ public class MainFrame extends JFrame {
     
     private void processTripEditDeleteClick(boolean edit) {
         var entity = getSelectedTripEntity();
+        var title = edit ? LocalizationProvider.getString("mainframe.button.edit")
+                : LocalizationProvider.getString("mainframe.button.delete");
         if (entity != null && entity.getId() > 0) {
             if (edit) {
                 openTripDialog(entity);
@@ -654,7 +663,7 @@ public class MainFrame extends JFrame {
                 }
             }
         } else {
-            showErrorMessage(LocalizationProvider.getString("mainframe.message.notripselected"));
+            showErrorMessage(LocalizationProvider.getString("mainframe.message.notripselected"), title);
         }
     }
     

@@ -9,7 +9,7 @@ import de.lordz.java.tools.tdm.entities.TripEntity;
 /**
  * Class to manage trips.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class TripManager {
@@ -44,13 +44,27 @@ public class TripManager {
         List<TripEntity> result = null;
         try {
             if (DatabaseProvider.getIsOpen()) {
-                result = DatabaseProvider.getEntities("SELECT t FROM TripEntity t WHERE t.deleted=0",
+                result = DatabaseProvider.getEntities("SELECT t FROM TripEntity t WHERE t.deleted=0 ORDER BY t.timeOfTrip DESC",
                         TripEntity.class);
             }
         } catch (Exception ex) {
             Logger.Log(ex);
         }
 
+        return result;
+    }
+    
+    public static boolean checkIsCustomerAssignd(int customerId) {
+        boolean result = true;
+        try {
+            var singleResult = DatabaseProvider.getSqlSingleResult("SELECT EXISTS (SELECT 1 FROM tbTrip WHERE coCustomerId=?1)", customerId);
+            if (singleResult != null && singleResult instanceof Integer) {
+                result = (int)singleResult == 1;
+            }
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }
+        
         return result;
     }
 }

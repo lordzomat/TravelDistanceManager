@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 /**
  * Application environment.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class ApplicationEnvironment {

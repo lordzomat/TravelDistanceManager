@@ -12,7 +12,7 @@ import de.lordz.java.tools.tdm.common.LocalizationProvider;
 /**
  * Dialog to show please wait and block (Modal).
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 class WaitDialog {

@@ -12,7 +12,7 @@ import javax.swing.SwingConstants;
 /**
  * StatusBar component based on JLabel.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class StatusBar extends JPanel {
@@ -30,10 +30,21 @@ public class StatusBar extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
     }
 
+    /**
+     * Sets the status message.
+     * 
+     * @param message The message to show as status-
+     */
     public void setStatusMessage(String message) {
         this.statusLabel.setText(message);
     }
 
+    /**
+     * Adds the statusbar to the given frame.
+     * 
+     * @param frame The frame the statusbar is added to.
+     * @return Returns the statusbar object itself.
+     */
     public static StatusBar addStatusbar(JFrame frame) {
         var statusBar = new StatusBar(frame.getWidth(), 16);
         statusBar.statusLabel = new JLabel("status");

@@ -7,7 +7,7 @@ import javax.swing.table.AbstractTableModel;
 /**
  * Table model for entity data.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class EntityTableModel<T> extends AbstractTableModel {

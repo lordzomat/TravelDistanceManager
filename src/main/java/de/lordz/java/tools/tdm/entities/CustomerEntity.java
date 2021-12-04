@@ -1,4 +1,4 @@
-package de.lordz.java.tools.tdm;
+package de.lordz.java.tools.tdm.entities;
 
 import javax.persistence.*;
 

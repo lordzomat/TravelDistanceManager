@@ -4,11 +4,12 @@ import java.util.AbstractMap;
 import java.util.List;
 
 import de.lordz.java.tools.tdm.common.Logger;
+import de.lordz.java.tools.tdm.entities.CustomerEntity;
 
 /**
  * Class to manage customers.
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class CustomerManager {

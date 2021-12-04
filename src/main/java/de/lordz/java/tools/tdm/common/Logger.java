@@ -5,7 +5,7 @@ import de.lordz.java.tools.tdm.TraceLevel;
 /**
  * Class to wrap all logging done in the application.
  * 
- * @author lordz
+ * @author lordzomat
  * 
  */
 public final class Logger {

@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
+import de.lordz.java.tools.tdm.entities.CustomerEntity;
 import de.lordz.java.tools.tdm.entities.TripEntity;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;

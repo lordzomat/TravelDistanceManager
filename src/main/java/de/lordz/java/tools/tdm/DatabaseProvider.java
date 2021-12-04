@@ -51,6 +51,15 @@ public final class DatabaseProvider {
 
                     factoryInstance = Persistence.createEntityManagerFactory("TravelDistanceManager", persistenceMap);
                     if (ensureDatabaseIsCreated()) {
+                        var manager = createEntityManager();
+                        if (manager != null) {
+                            var nativeQuery = manager.createNativeQuery("PRAGMA journal_mode=WAL;");
+                            if (nativeQuery != null) {
+                                nativeQuery.getSingleResult();
+                            }
+                            manager.close();
+                        }
+                        
                         isOpen.set(true);
                         result = true;
                         Logger.LogVerbose("Database %s was openend", databasePath);
@@ -234,6 +243,32 @@ public final class DatabaseProvider {
 
         return result;
     }
+    
+    public static Object getSqlSingleResult(String sqlQuery, Object... parameters) {
+        Object result = null;
+        EntityManager manager = null;
+        try {
+            if (!Strings.isNullOrEmpty(sqlQuery)) {
+                manager = createEntityManager();
+                if (manager != null) {
+                    var nativeQuery = manager.createNativeQuery(sqlQuery);
+                    if (nativeQuery != null) {
+                        if (parameters != null) {
+                            for (int i= 0; i < parameters.length; i++) {
+                                nativeQuery.setParameter(i + 1, parameters[i]);
+                            }
+                        }
+                        
+                        result = nativeQuery.getSingleResult();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }
+        
+        return result;
+    }
 
     private static boolean ensureDatabaseIsCreated() {
         boolean result = false;
@@ -283,13 +318,14 @@ public final class DatabaseProvider {
                         query.setParameter(1, DateTimeHelper.getIsoDateTime());
                         query.setParameter(2, "Database created");
                         query.executeUpdate();
+                        
+                        query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
+                        query.setParameter(1, "tbCustomers");
+                        query.executeUpdate();
+                        query.setParameter(1, "tbTrip");
+                        query.executeUpdate();                        
                     }
-
-                    query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
-                    query.setParameter(1, "tbCustomers");
-                    query.executeUpdate();
-                    query.setParameter(1, "tbTrip");
-                    query.executeUpdate();
+                    
                     result = true;
                 }
             }

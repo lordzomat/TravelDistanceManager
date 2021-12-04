@@ -14,7 +14,7 @@ import de.lordz.java.tools.tdm.common.Logger;
 /**
  * Represents the application configuration (JSON file).
  * 
- * @author lordz
+ * @author lordzomat
  *
  */
 public class AppConfiguration {
