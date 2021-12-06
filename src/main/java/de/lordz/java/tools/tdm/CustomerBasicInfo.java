@@ -19,7 +19,7 @@ import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
-import de.lordz.java.tools.tdm.entities.CustomerEntity;
+import de.lordz.java.tools.tdm.entities.Customer;
 
 /**
  * Panel to handle basic customer info.
@@ -36,7 +36,7 @@ public class CustomerBasicInfo extends JPanel {
     private JTextField textFieldCity;
     private JTextField textFieldDistance;
     private JTextArea textAreaDescription;
-    private CustomerEntity currentCustomer;
+    private Customer currentCustomer;
     private boolean editMode;
 
     public CustomerBasicInfo() {
@@ -129,7 +129,7 @@ public class CustomerBasicInfo extends JPanel {
      * 
      * @param customer The entity from which the data is taken.
      */
-    public void fillFromEnity(CustomerEntity customer) {
+    public void fillFromEnity(Customer customer) {
         if (customer != null) {
             this.textFieldName.setText(customer.getName());
             this.textFieldStreet.setText(customer.getStreet());
@@ -138,7 +138,7 @@ public class CustomerBasicInfo extends JPanel {
             this.textFieldDistance.setText(Double.toString(customer.getDistance()));
             this.textAreaDescription.setText(customer.getDescription());
         } else {
-            customer = new CustomerEntity();
+            customer = new Customer();
         }
 
         if (this.editMode) {

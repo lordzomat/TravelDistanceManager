@@ -328,7 +328,9 @@ public final class DatabaseProvider {
                         query.setParameter(1, "tbCustomers");
                         query.executeUpdate();
                         query.setParameter(1, "tbTrip");
-                        query.executeUpdate();                        
+                        query.executeUpdate();
+                        query.setParameter(1, "tbTripType");
+                        query.executeUpdate();
                     }
                     
                     result = true;

@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "tbCustomers")
-public class CustomerEntity {
+public class Customer implements IEntityId {
 
     @Id
     @GeneratedValue(generator = "sqlite_customers")
@@ -33,8 +33,8 @@ public class CustomerEntity {
     @Column(name = "coDeleted", nullable = false)
     private int deleted;
 
-    public Integer getId() {
-        return id;
+    public int getId() {
+        return this.id;
     }
 
     public void setId(int id) {
@@ -58,7 +58,7 @@ public class CustomerEntity {
     }
 
     public String getPostcode() {
-        return postcode;
+        return this.postcode;
     }
 
     public void setPostcode(String postcode) {
@@ -66,7 +66,7 @@ public class CustomerEntity {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {

@@ -17,8 +17,7 @@ import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
-import de.lordz.java.tools.tdm.entities.CustomerEntity;
-import de.lordz.java.tools.tdm.entities.TripEntity;
+import de.lordz.java.tools.tdm.entities.*;
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;
 
@@ -27,17 +26,17 @@ public class TripDialog extends JDialog {
     private static final long serialVersionUID = -3335942655314531982L;
     private final JPanel contentPanel = new JPanel();
     private JButton buttonOk;
-    private TripEntity currentTrip;
+    private Trip currentTrip;
     private TripBasicInfo tripBasicInfo;
     private boolean dataSaved;
 
     /**
      * Create the dialog.
      */
-    public TripDialog(Collection<CustomerEntity> customers) {
+    public TripDialog(Collection<Customer> customers, Collection<TripType> tripTypes) {
         setBounds(100, 100, 450, 412);
         setResizable(false);
-        setIconImage(IconFontSwing.buildImage(FontAwesome.USERS, 15, Color.lightGray));
+        setIconImage(IconFontSwing.buildImage(FontAwesome.CAR, 15, Color.lightGray));
         getContentPane().setLayout(new BorderLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -45,7 +44,7 @@ public class TripDialog extends JDialog {
         contentPanel.setLayout(springLayout);
         this.tripBasicInfo= new TripBasicInfo();
         springLayout.putConstraint(SpringLayout.SOUTH, tripBasicInfo, 315, SpringLayout.NORTH, contentPanel);
-        this.tripBasicInfo.setCustomers(customers);
+        this.tripBasicInfo.reloadReferenceData(customers, tripTypes);
         this.tripBasicInfo.setEditable(true);
         springLayout.putConstraint(SpringLayout.NORTH, this.tripBasicInfo, 5, SpringLayout.NORTH, contentPanel);
         springLayout.putConstraint(SpringLayout.WEST, this.tripBasicInfo, 5, SpringLayout.WEST, contentPanel);
@@ -72,10 +71,10 @@ public class TripDialog extends JDialog {
         }
     }
 
-    public boolean showDialog(TripEntity trip, java.awt.Window window) {
+    public boolean showDialog(Trip trip, java.awt.Window window) {
         String titleKey = trip == null ? "tripbasicinfo.title.new" : "tripbasicinfo.title.edit";
         try {
-            this.currentTrip = trip != null ? trip : new TripEntity();
+            this.currentTrip = trip != null ? trip : new Trip();
             this.tripBasicInfo.fillFromEnity(this.currentTrip);
         } catch (Exception ex) {
             Logger.Log(ex);

@@ -19,7 +19,7 @@ import de.lordz.java.tools.tdm.common.DateTimeHelper;
 
 @Entity
 @Table(name = "tbTrip")
-public class TripEntity {
+public class Trip implements IEntityId {
 
     @Id
     @GeneratedValue(generator = "sqlite_trip")
@@ -29,6 +29,9 @@ public class TripEntity {
 
     @Column(name = "coCustomerId")
     private int customerId;
+    
+    @Column(name = "coTripTypeId")
+    private int tripTypeId;
 
     @Column(name = "coTimeOfTrip")
     private String timeOfTrip; 
@@ -43,7 +46,7 @@ public class TripEntity {
     private LocalDateTime localDateTime;
     
     public int getId() {
-        return id;
+        return this.id;
     }
     
     public void setId(int id) {
@@ -51,15 +54,23 @@ public class TripEntity {
     }
     
     public int getCustomerId() {
-        return customerId;
+        return this.customerId;
     }
     
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }
     
+    public int getTripTypeId() {
+        return this.tripTypeId;
+    }
+    
+    public void setTripTypeId(int tripTypeId) {
+        this.tripTypeId = tripTypeId;
+    }
+    
     public String getTimeOfTrip() {
-        return timeOfTrip;
+        return this.timeOfTrip;
     }
     
     public void setTimeOfTrip(String timeOfTrip) {
@@ -68,7 +79,7 @@ public class TripEntity {
     }
     
     public String getDescription() {
-        return description;
+        return this.description;
     }
     
     public void setDescription(String description) {
