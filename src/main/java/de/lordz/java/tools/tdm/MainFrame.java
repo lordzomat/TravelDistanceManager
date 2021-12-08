@@ -541,7 +541,11 @@ public class MainFrame extends JFrame {
             fileChooser.setAcceptAllFileFilterUsed(false);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
-                final var databasePath = fileChooser.getSelectedFile().toString();
+                var databasePath = fileChooser.getSelectedFile().toString();
+                if (!databasePath.endsWith(".db")) {
+                    databasePath = databasePath + ".db";
+                }
+                
                 openDatabase(databasePath);
             }
         } catch (Exception ex) {
