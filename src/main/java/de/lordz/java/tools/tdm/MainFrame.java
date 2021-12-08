@@ -194,6 +194,7 @@ public class MainFrame extends JFrame {
         panelCustomersRight.setLayout(new BorderLayout(0, 0));
 
         JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
         panelCustomersRight.add(toolBar, BorderLayout.NORTH);
 
         this.buttonNewCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
@@ -252,6 +253,7 @@ public class MainFrame extends JFrame {
         panelTripsRight.setLayout(new BorderLayout(0, 0));
         
         JToolBar toolBarTrips = new JToolBar();
+        toolBarTrips.setFloatable(false);
         panelTripsRight.add(toolBarTrips, BorderLayout.NORTH);
         
         this.buttonNewTrip = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
@@ -322,6 +324,7 @@ public class MainFrame extends JFrame {
         panelTripTypesRight.setLayout(new BorderLayout(0, 0));
         
         JToolBar toolBarTripTypes = new JToolBar();
+        toolBarTripTypes.setFloatable(false);
         panelTripTypesRight.add(toolBarTripTypes, BorderLayout.NORTH);
         
         this.buttonNewTripType = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
@@ -477,13 +480,14 @@ public class MainFrame extends JFrame {
         this.tableTrips.setShowGrid(true);
     }
     
-    private void setActionButtonsEnabledState(boolean enaled) {
-        this.buttonNewCustomer.setEnabled(enaled);
-        this.buttonEditCustomer.setEnabled(enaled);
-        this.buttonDeleteCustomer.setEnabled(enaled);
-        this.buttonNewTripType.setEnabled(enaled);
-        this.buttonEditTripType.setEnabled(enaled);
-        this.buttonDeleteTripType.setEnabled(enaled);
+    private void setActionButtonsEnabledState(boolean enabled) {
+        this.buttonNewCustomer.setEnabled(enabled);
+        this.buttonEditCustomer.setEnabled(enabled);
+        this.buttonDeleteCustomer.setEnabled(enabled);
+        this.buttonNewTripType.setEnabled(enabled);
+        this.buttonEditTripType.setEnabled(enabled);
+        this.buttonDeleteTripType.setEnabled(enabled);
+        this.reportPanel.setEnabled(enabled);
     }
     
     private void setTripActionButtonsEnabledState(boolean enaled) {

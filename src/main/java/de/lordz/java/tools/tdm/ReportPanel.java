@@ -33,6 +33,7 @@ public class ReportPanel extends JPanel {
     private JCheckBox checkboxSimpleYear;
     private JCheckBox checkBoxSimpleMonths;
     private JCheckBox checkBoxDetailed;
+    private JButton buttonStart;
     private ReportConfiguration currentConfiguration;
     private Consumer<ReportConfiguration> createReportAction;
     private BiConsumer<String, String> showErrorMessageConsumer;
@@ -172,13 +173,13 @@ public class ReportPanel extends JPanel {
         constraintCheckBoxDetailed.gridy = 3;
         panelTypeSelection.add(this.checkBoxDetailed, constraintCheckBoxDetailed);
         
-        var buttonStart = new JButton(LocalizationProvider.getString("reportpanel.button.create"));
-        buttonStart.addActionListener(e -> createReports());
+        this.buttonStart = new JButton(LocalizationProvider.getString("reportpanel.button.create"));
+        this.buttonStart.addActionListener(e -> createReports());
         var gridBagbuttonStart = new GridBagConstraints();
         gridBagbuttonStart.anchor = GridBagConstraints.WEST;
         gridBagbuttonStart.gridx = 0;
         gridBagbuttonStart.gridy = 4;
-        panelTypeSelection.add(buttonStart, gridBagbuttonStart);
+        panelTypeSelection.add(this.buttonStart, gridBagbuttonStart);
         
         this.textFieldYear.setText(String.valueOf(LocalDate.now().getYear()));
     }
@@ -199,6 +200,19 @@ public class ReportPanel extends JPanel {
         this.checkboxSimpleYear.setSelected(configuration.GenerateSimpleYears);
         this.checkBoxSimpleMonths.setSelected(configuration.GenerateSimpleMonths);
         this.checkBoxDetailed.setSelected(configuration.GenerateDetailed);
+    }
+    
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        
+        this.textFieldOutputDirectory.setEnabled(enabled);
+        this.textFieldOutputFileName.setEnabled(enabled);
+        this.textFieldYear.setEnabled(enabled);
+        this.checkboxSimpleYear.setEnabled(enabled);
+        this.checkBoxSimpleMonths.setEnabled(enabled);
+        this.checkBoxDetailed.setEnabled(enabled);
+        this.buttonStart.setEnabled(enabled);
     }
     
     public void setCreateReportAction(Consumer<ReportConfiguration> consumer) {
