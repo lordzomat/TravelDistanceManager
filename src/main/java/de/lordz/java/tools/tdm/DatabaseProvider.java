@@ -188,18 +188,20 @@ public final class DatabaseProvider {
      * @param parameters  The parameters to pass to the query.
      * @return Returns the entity on success, otherwise null.
      */
-    @SafeVarargs
     public static <T> T getEntity(String query, Class<T> entityClass,
-            AbstractMap.SimpleEntry<String, Object>... parameters) {
+            List<AbstractMap.SimpleEntry<String, Object>> parameters) {
         T result = null;
         EntityManager manager = null;
         try {
             manager = createEntityManager();
             if (manager != null) {
                 TypedQuery<T> typedQuery = manager.createQuery(query, entityClass);
-                for (AbstractMap.SimpleEntry<String, Object> parameter : parameters) {
-                    typedQuery.setParameter(parameter.getKey(), parameter.getValue());
+                if (parameters != null) {
+                    for (AbstractMap.SimpleEntry<String, Object> parameter : parameters) {
+                        typedQuery.setParameter(parameter.getKey(), parameter.getValue());
+                    }
                 }
+                
                 var resultList = typedQuery.getResultList();
                 if (resultList != null && resultList.size() > 0) {
                     result = resultList.get(0);
@@ -222,15 +224,22 @@ public final class DatabaseProvider {
      * @param <T>         The type of the entity.
      * @param query       The query itself.
      * @param entityClass The entity class.
+     * @param parameters  The parameters if any to pass to the query.
      * @return Returns a list of entities on success, otherwise null.
      */
-    public static <T> List<T> getEntities(String query, Class<T> entityClass) {
+    public static <T> List<T> getEntities(String query, Class<T> entityClass, List<AbstractMap.SimpleEntry<String, Object>> parameters) {
         List<T> result = null;
         EntityManager manager = null;
         try {
             manager = createEntityManager();
             if (manager != null) {
                 TypedQuery<T> typedQuery = manager.createQuery(query, entityClass);
+                if (parameters != null) {
+                    for (AbstractMap.SimpleEntry<String, Object> parameter : parameters) {
+                        typedQuery.setParameter(parameter.getKey(), parameter.getValue());
+                    }
+                }
+                
                 result = typedQuery.getResultList();
             }
         } catch (Exception ex) {
@@ -326,6 +335,8 @@ public final class DatabaseProvider {
                         
                         query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
                         query.setParameter(1, "tbCustomers");
+                        query.executeUpdate();
+                        query.setParameter(1, "tbTravelAllowance");
                         query.executeUpdate();
                         query.setParameter(1, "tbTrip");
                         query.executeUpdate();

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
@@ -15,13 +16,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.github.lgooddatepicker.components.DatePicker;
 import com.google.common.base.Strings;
-
 import de.lordz.java.tools.tdm.common.AppConstants;
 import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.config.AppConfiguration;
+import de.lordz.java.tools.tdm.config.ReportConfiguration;
 import de.lordz.java.tools.tdm.entities.*;
 
 import javax.swing.JMenuBar;
@@ -31,6 +33,8 @@ import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.awt.event.ActionEvent;
@@ -40,10 +44,12 @@ import java.awt.FlowLayout;
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.SpringLayout;
@@ -69,6 +75,9 @@ public class MainFrame extends JFrame {
     private JButton buttonNewTrip;
     private JButton buttonEditTrip;
     private JButton buttonDeleteTrip;
+    private JToggleButton toggleButtonTripFilterEnabled;
+    private DatePicker datePickerTripFilterStart;
+    private DatePicker datePickerTripFilterEnd;
     private JButton buttonNewTripType;
     private JButton buttonEditTripType;
     private JButton buttonDeleteTripType;    
@@ -78,6 +87,7 @@ public class MainFrame extends JFrame {
     private CustomerBasicInfo customerBasicInfo;
     private TripBasicInfo tripBasicInfo;
     private TripTypeBasicInfo tripTypeBasicInfo;
+    private ReportPanel reportPanel;
 
     /**
      * Launch the application.
@@ -259,6 +269,26 @@ public class MainFrame extends JFrame {
         this.buttonDeleteTrip.addActionListener(e -> processTripEditDeleteClick(false));
         toolBarTrips.add(this.buttonDeleteTrip);
         
+        this.toggleButtonTripFilterEnabled = new JToggleButton(IconFontSwing.buildIcon(FontAwesome.FILTER, 20, new Color(0, 145, 255)));
+        this.toggleButtonTripFilterEnabled.setSelected(true);
+        this.toggleButtonTripFilterEnabled.setToolTipText(LocalizationProvider.getString("mainframe.button.tooltip.tripFilter"));
+        this.toggleButtonTripFilterEnabled.addItemListener(e -> processTripFilterInputChanged(true));
+        toolBarTrips.add(this.toggleButtonTripFilterEnabled);
+        
+        this.datePickerTripFilterStart = DateTimeHelper.createDatePicker();
+        this.datePickerTripFilterStart.setDate(LocalDate.of(LocalDate.now().getYear(), 1, 1));
+        this.datePickerTripFilterStart.addDateChangeListener(e -> processTripFilterInputChanged(false));
+        var panelDatePickerFilterStart = createDatePickerPanel(this.datePickerTripFilterStart,
+                LocalizationProvider.getString("mainframe.datepicker.tooltip.from"));
+        toolBarTrips.add(panelDatePickerFilterStart);
+        
+        this.datePickerTripFilterEnd = DateTimeHelper.createDatePicker();
+        this.datePickerTripFilterEnd.setDate(LocalDate.of(LocalDate.now().getYear(), 12, 31));
+        this.datePickerTripFilterEnd.addDateChangeListener(e -> processTripFilterInputChanged(false));
+        var panelDatePickerFilterEnd = createDatePickerPanel(this.datePickerTripFilterEnd,
+                LocalizationProvider.getString("mainframe.datepicker.tooltip.until"));
+        toolBarTrips.add(panelDatePickerFilterEnd);
+        
         JPanel panelTripsInfo = new JPanel();
         panelTripsRight.add(panelTripsInfo, BorderLayout.CENTER);
         panelTripsInfo.setLayout(null);
@@ -323,6 +353,12 @@ public class MainFrame extends JFrame {
         JPanel panelReport = new JPanel();
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport,
                 LocalizationProvider.getString("mainframe.button.tooltip.report"));
+        panelReport.setLayout(null);
+        
+        this.reportPanel = new ReportPanel((message, title) -> showErrorMessage(message, title));
+        this.reportPanel.setBounds(0, 0, 500, 343);
+        this.reportPanel.setCreateReportAction(e -> performCreateReport(e));
+        panelReport.add(this.reportPanel);
         
         /*** Common ****/
 
@@ -338,11 +374,30 @@ public class MainFrame extends JFrame {
             if (!Strings.isNullOrEmpty(selectedTheme)) {
                 setLookAndFeel(selectedTheme);
             }
+            
+            var reportConfiguration = this.appConfiguration.ReportConfig;
+            if (reportConfiguration != null) {
+                this.reportPanel.initialize(reportConfiguration);
+            }
         }
         
         populateThemeMenuItems(this.mainMenuItemTheme, selectedTheme);
         reloadRecentDatabaseMenu();
+        tabbedPane.setSelectedIndex(1);
     }
+    
+    private JPanel createDatePickerPanel(DatePicker datePicker, String caption) {
+        final var panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        final var label = new JLabel(caption);
+        final var border = new EmptyBorder(0,0,0,5);
+        label.setBorder(border);
+        panel.add(label);
+        panel.add(datePicker);
+        panel.setMaximumSize(new Dimension(150, 25));
+        datePicker.setBorder(border);
+        return panel;
+    }    
     
     private void openCustomerDialog(Customer entity) {
         var cutomerDialog = new CustomerDialog();
@@ -435,6 +490,9 @@ public class MainFrame extends JFrame {
         this.buttonNewTrip.setEnabled(enaled);
         this.buttonEditTrip.setEnabled(enaled);
         this.buttonDeleteTrip.setEnabled(enaled);
+        this.toggleButtonTripFilterEnabled.setEnabled(enaled);
+        this.datePickerTripFilterStart.setEnabled(enaled);
+        this.datePickerTripFilterEnd.setEnabled(enaled);
     }
 
     private void openDatabaseAsync(String databasePath, StatusBar statusBar) {
@@ -605,7 +663,11 @@ public class MainFrame extends JFrame {
     }
     
     private void showErrorMessage(String message, String title) {
-        JOptionPane.showMessageDialog(this, message, title, JOptionPane.ERROR_MESSAGE);
+        showMessage(message, title, JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showMessage(String message, String title, int messageType) {
+        JOptionPane.showMessageDialog(this, message, title, messageType);
     }
 
     private void addRecentDatabase(String databasePath) {
@@ -686,8 +748,16 @@ public class MainFrame extends JFrame {
         if (!DatabaseProvider.getIsOpen()) {
             return;
         }
+        
+        List<Trip> trips;
+        if (this.toggleButtonTripFilterEnabled.isSelected() && 
+                this.datePickerTripFilterStart.isTextFieldValid() &&
+                this.datePickerTripFilterEnd.isTextFieldValid()) {            
+            trips = TripManager.getTrips(this.datePickerTripFilterStart.getDate(), this.datePickerTripFilterEnd.getDate());            
+        } else {
+            trips = TripManager.getTrips();
+        }
 
-        var trips = TripManager.getTrips();
         this.tableTrips.setModel(new EntityTableModel<Trip>(trips, this.tripsColumnMap));
         var columnModel = this.tableTrips.getColumnModel();
         if (columnModel != null && columnModel.getColumnCount() > 0) {
@@ -742,8 +812,7 @@ public class MainFrame extends JFrame {
                 openTripDialog(entity);
             } else {
                 var message = String.format(LocalizationProvider.getString("mainframe.message.confirmtripdelete"), 
-                        DateTimeHelper.toDisplayDateFormat(entity.getLocalDate()), 
-                        DateTimeHelper.toDisplayShortTimeFormat(entity.getLocalTime()));
+                        DateTimeHelper.toDisplayDateFormat(entity.getLocalDate()));
                 if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
                     entity.setDeleted();
                     DatabaseProvider.updateEntity(entity);
@@ -752,6 +821,13 @@ public class MainFrame extends JFrame {
             }
         } else {
             showErrorMessage(LocalizationProvider.getString("mainframe.message.notripselected"), title);
+        }
+    }
+    
+    private void processTripFilterInputChanged(boolean toggleButtonChanged) {
+        boolean reload = toggleButtonChanged || this.toggleButtonTripFilterEnabled.isSelected();
+        if (reload) {
+            reloadTripTable();
         }
     }
     
@@ -804,6 +880,94 @@ public class MainFrame extends JFrame {
             }
         } else {
             showErrorMessage(LocalizationProvider.getString("mainframe.message.notriptypeselected"), title);
+        }
+    }
+    
+    private boolean createReportAsync(ReportConfiguration configuration) {
+        boolean result = false;
+        if (configuration == null) {
+            return result;
+        }
+        
+        try {
+            var outputDirectory = configuration.OutputDirectory;
+            var outputFileName = configuration.OutputFileName;
+            if (!Strings.isNullOrEmpty(outputDirectory) && !Strings.isNullOrEmpty(outputFileName)) {
+                outputFileName = outputFileName + "_" + DateTimeHelper.toSortableDate(LocalDate.now());
+                
+                var generator = new ReportGenerator(this.currentCustomers, this.currentTripTypes);
+                boolean success = true;
+                if (configuration.GenerateSimpleYears) {
+                    var fileName = outputFileName + "_" + LocalizationProvider.getString("report.filename.suffix.simpleyears") + ".pdf";
+                    var outputPath = Paths.get(outputDirectory, fileName);
+                    success = generator.generateReport(ReportGenerator.REPORT_SIMPLE_YEARS, configuration.YearToReport, outputPath); 
+                }
+                
+                if (success && configuration.GenerateSimpleMonths) {
+                    var detailedFileName = outputFileName + "_" + LocalizationProvider.getString("report.filename.suffix.simplemonths") + ".pdf";
+                    var outputPath = Paths.get(outputDirectory, detailedFileName);
+                    success = generator.generateReport(ReportGenerator.REPORT_SIMPLE_MONTHS, configuration.YearToReport, outputPath); 
+                }
+                
+                if (success && configuration.GenerateDetailed) {
+                    var detailedFileName = outputFileName + "_" + LocalizationProvider.getString("report.filename.suffix.detailed") + ".pdf";
+                    var outputPath = Paths.get(outputDirectory, detailedFileName);
+                    success = generator.generateReport(ReportGenerator.REPORT_DETAILED, configuration.YearToReport, outputPath); 
+                }
+                
+                result = success;
+            }
+            
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        } 
+        
+        return result;
+    }
+    
+    private void performCreateReport(ReportConfiguration configuration) {
+        if (configuration == null) {
+            return;
+        }
+        
+        try {
+            var currentAppConfiguration = this.appConfiguration;
+            if (currentAppConfiguration == null) {
+                currentAppConfiguration = this.appConfiguration = new AppConfiguration();
+            }
+            
+            currentAppConfiguration.ReportConfig = configuration;
+            currentAppConfiguration.saveConfiguration();
+            var waitDialog = new WaitDialog();
+            var worker = new SwingWorker<Boolean, Void>() {
+                @Override
+                public Boolean doInBackground() {
+                    return createReportAsync(configuration);
+                }
+
+                @Override
+                public void done() {
+                    try {
+                        if (get()) {
+                            showMessage(LocalizationProvider.getString("report.message.createsuccess"), 
+                                    LocalizationProvider.getString("mainframe.button.tooltip.report"), JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            showErrorMessage(LocalizationProvider.getString("report.message.createfailed"),
+                                    LocalizationProvider.getString("mainframe.button.tooltip.report"));
+                        }
+                    } catch (InterruptedException ignore) {
+                    } catch (java.util.concurrent.ExecutionException ex) {
+                        Logger.Log(ex);
+                    }
+
+                    waitDialog.close();
+                }
+            };
+
+            worker.execute();
+            waitDialog.showDialog(LocalizationProvider.getString("mainframe.menuitem.opendatabase"), this);
+        } catch (Exception ex) {
+            Logger.Log(ex);
         }
     }
     

@@ -27,6 +27,8 @@ public class AppConfiguration {
     public List<String> RecentDatabases = new ArrayList<String>();
 
     public String SelectedTheme;
+    
+    public ReportConfiguration ReportConfig;
 
     /**
      * Loads the configuration.

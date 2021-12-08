@@ -13,17 +13,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.entities.*;
 import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.DatePickerSettings;
-import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
-import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.awt.FlowLayout;
 
 /**
@@ -93,11 +90,8 @@ public class TripBasicInfo extends JPanel {
         constraintLabelDate.gridy = 2;
         add(labelDate, constraintLabelDate);
         
-        var dateSettings = new DatePickerSettings();
-        dateSettings.setHighlightPolicy(new WeekendHighlightPolicy());
-        dateSettings.setFormatForDatesCommonEra("dd.MM.yyyy");
         var panelDatePicker = new JPanel();
-        this.datePicker = new DatePicker(dateSettings);
+        this.datePicker = DateTimeHelper.createDatePicker();
         GridBagConstraints constraintDatePicker = new GridBagConstraints();
         constraintDatePicker.fill = GridBagConstraints.BOTH;
         constraintDatePicker.insets = new Insets(0, 0, 5, 0);
@@ -261,7 +255,7 @@ public class TripBasicInfo extends JPanel {
 //            this.currentTrip.setTimeOfTrip(this.datePicker.getDateStringOrEmptyString() + "T" + this.timePicker.getTimeStringOrEmptyString());
 //        }        
         if (this.datePicker.isTextFieldValid()) {
-            this.currentTrip.setTimeOfTrip(this.datePicker.getDateStringOrEmptyString() + "T00:00");
+            this.currentTrip.setTimeOfTrip(DateTimeHelper.toSortableDateTime(this.datePicker.getDate()));
         }
     }
     
@@ -277,21 +271,6 @@ public class TripBasicInfo extends JPanel {
             }
         } else if (selectedId == 0) {
             comboBox.setSelectedIndex(-1);
-        }
-    }
-   
-    private static class WeekendHighlightPolicy implements DateHighlightPolicy {
-
-        @Override
-        public HighlightInformation getHighlightInformationOrNull(LocalDate date) {
-            if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                return new HighlightInformation(Color.LIGHT_GRAY, Color.BLACK, null);
-            }
-            if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                return new HighlightInformation(Color.GRAY, Color.BLACK, null);
-            }
-            
-            return null;
         }
     }
 }

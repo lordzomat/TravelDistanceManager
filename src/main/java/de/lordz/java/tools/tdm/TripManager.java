@@ -1,9 +1,13 @@
 package de.lordz.java.tools.tdm;
 
+import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Strings;
+
+import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.entities.*;
 
@@ -25,9 +29,10 @@ public class TripManager {
         Trip result = null;
         try {
             if (DatabaseProvider.getIsOpen()) {
-                var parameter = new AbstractMap.SimpleEntry<String, Object>("tripId", id);
+                final var parameters = new ArrayList<AbstractMap.SimpleEntry<String, Object>>(1);
+                parameters.add(new AbstractMap.SimpleEntry<String, Object>("tripId", id));
                 result = DatabaseProvider.getEntity("SELECT t FROM Trip c WHERE t.deleted=0 AND t.id=:tripId",
-                        Trip.class, parameter);
+                        Trip.class, parameters);
             }
         } catch (Exception ex) {
             Logger.Log(ex);
@@ -42,11 +47,60 @@ public class TripManager {
      * @return Returns a list of trips on success, otherwise null.
      */
     public static List<Trip> getTrips() {
+        return getTrips(null, null);
+    }
+    
+    /**
+     * Gets all available trips.
+     * 
+     * @param start The selection start date if specified.
+     * @param end The selection end date if specified.
+     * @return Returns a list of trips on success, otherwise null.
+     */
+    public static List<Trip> getTrips(LocalDate start, LocalDate end) {
+        return getTrips(start, end, true);
+    }
+    
+    /**
+     * Gets all available trips.
+     * 
+     * @param start The selection start date if specified.
+     * @param end The selection end date if specified.
+     * @param sortDesceding If true the selection is sorted descending by date and identifier.
+     * @return Returns a list of trips on success, otherwise null.
+     */
+    public static List<Trip> getTrips(LocalDate start, LocalDate end, boolean sortDesceding) {
         List<Trip> result = null;
         try {
             if (DatabaseProvider.getIsOpen()) {
-                result = DatabaseProvider.getEntities("SELECT t FROM Trip t WHERE t.deleted=0 ORDER BY t.timeOfTrip DESC, t.id DESC",
-                        Trip.class);
+                final var queryTemplate = "SELECT t FROM Trip t WHERE t.deleted=0 %s ORDER BY %s";
+                final var orderBy = sortDesceding ? "t.timeOfTrip DESC, t.id DESC" : "t.timeOfTrip ASC, t.id ASC";
+                String query = null;
+                final var parameters = new ArrayList<AbstractMap.SimpleEntry<String, Object>>(2);
+                if (start == null && end == null) {
+                    query = String.format(queryTemplate, "", orderBy);
+                } else {
+                    String whereClause = "";
+                    if (start != null) {
+                        whereClause = " AND t.timeOfTrip >= :startDate";
+                        parameters.add(new AbstractMap.SimpleEntry<String, Object>("startDate", DateTimeHelper.toSortableDateTime(start)));
+                    }
+                    
+                    if (end != null) {
+                        if (!Strings.isNullOrEmpty(whereClause)) {
+                            whereClause += " ";
+                        }
+                        
+                        whereClause += " AND t.timeOfTrip <= :endDate";
+                        parameters.add(new AbstractMap.SimpleEntry<String, Object>("endDate", DateTimeHelper.toSortableDateTime(end)));
+                    }
+                    
+                    query = String.format(queryTemplate, whereClause, orderBy);
+                }
+                
+                if (!Strings.isNullOrEmpty(query)) {
+                    result = DatabaseProvider.getEntities(query, Trip.class, parameters);
+                }
             }
         } catch (Exception ex) {
             Logger.Log(ex);
@@ -111,7 +165,7 @@ public class TripManager {
         try {
             if (DatabaseProvider.getIsOpen()) {
                 result = DatabaseProvider.getEntities("SELECT t FROM TripType t WHERE t.deleted=0",
-                        TripType.class);
+                        TripType.class, null);
             }
         } catch (Exception ex) {
             Logger.Log(ex);

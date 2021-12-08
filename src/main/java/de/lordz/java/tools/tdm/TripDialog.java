@@ -34,7 +34,7 @@ public class TripDialog extends JDialog {
      * Create the dialog.
      */
     public TripDialog(Collection<Customer> customers, Collection<TripType> tripTypes) {
-        setBounds(100, 100, 450, 412);
+        setBounds(100, 100, 469, 412);
         setResizable(false);
         setIconImage(IconFontSwing.buildImage(FontAwesome.CAR, 15, Color.lightGray));
         getContentPane().setLayout(new BorderLayout());
@@ -44,11 +44,11 @@ public class TripDialog extends JDialog {
         contentPanel.setLayout(springLayout);
         this.tripBasicInfo= new TripBasicInfo();
         springLayout.putConstraint(SpringLayout.SOUTH, tripBasicInfo, 315, SpringLayout.NORTH, contentPanel);
+        springLayout.putConstraint(SpringLayout.EAST, tripBasicInfo, 438, SpringLayout.WEST, contentPanel);
         this.tripBasicInfo.reloadReferenceData(customers, tripTypes);
         this.tripBasicInfo.setEditable(true);
         springLayout.putConstraint(SpringLayout.NORTH, this.tripBasicInfo, 5, SpringLayout.NORTH, contentPanel);
         springLayout.putConstraint(SpringLayout.WEST, this.tripBasicInfo, 5, SpringLayout.WEST, contentPanel);
-        springLayout.putConstraint(SpringLayout.EAST, this.tripBasicInfo, 419, SpringLayout.WEST, contentPanel);
         contentPanel.add(this.tripBasicInfo);
 
         {
