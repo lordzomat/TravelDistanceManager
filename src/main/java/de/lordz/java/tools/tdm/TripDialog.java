@@ -117,7 +117,7 @@ public class TripDialog extends JDialog {
     }
     
     private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, LocalizationProvider.getString("mainframe.menuitem.opendatabase"),
+        JOptionPane.showMessageDialog(this, message, getTitle(),
                 JOptionPane.ERROR_MESSAGE);
     }
 }

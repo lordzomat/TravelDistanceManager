@@ -1,7 +1,5 @@
 package de.lordz.java.tools.tdm.common;
 
-import de.lordz.java.tools.tdm.TraceLevel;
-
 /**
  * Class to wrap all logging done in the application.
  * 

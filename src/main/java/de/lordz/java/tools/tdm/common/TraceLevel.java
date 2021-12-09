@@ -1,4 +1,4 @@
-package de.lordz.java.tools.tdm;
+package de.lordz.java.tools.tdm.common;
 
 public enum TraceLevel {
     Verbose(4), Information(3), Warning(2), Error(1), ALL(0);

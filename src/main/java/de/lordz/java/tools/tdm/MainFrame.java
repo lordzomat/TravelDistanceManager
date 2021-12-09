@@ -20,6 +20,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.google.common.base.Strings;
 import de.lordz.java.tools.tdm.common.AppConstants;
 import de.lordz.java.tools.tdm.common.DateTimeHelper;
+import de.lordz.java.tools.tdm.common.IUserNotificationHandler;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.config.AppConfiguration;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import jiconfont.icons.font_awesome.FontAwesome;
@@ -54,7 +56,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.SpringLayout;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements IUserNotificationHandler {
 
     private static final long serialVersionUID = 404497382974994431L;
     private static final DefaultTableCellRenderer RightTableCellRenderer = CreateTableCellRightRenderer();
@@ -87,6 +89,7 @@ public class MainFrame extends JFrame {
     private CustomerBasicInfo customerBasicInfo;
     private TripBasicInfo tripBasicInfo;
     private TripTypeBasicInfo tripTypeBasicInfo;
+    private TravelAllowancePanel travelAllowancePanel;
     private ReportPanel reportPanel;
 
     /**
@@ -356,12 +359,14 @@ public class MainFrame extends JFrame {
         JPanel panelReport = new JPanel();
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport,
                 LocalizationProvider.getString("mainframe.button.tooltip.report"));
-        panelReport.setLayout(null);
-        
+        panelReport.setLayout(new BorderLayout(0, 0));
+        var panelReportContent = new JPanel(new BorderLayout(0, 0));
+        panelReport.add(panelReportContent, BorderLayout.WEST);
         this.reportPanel = new ReportPanel((message, title) -> showErrorMessage(message, title));
         this.reportPanel.setBounds(0, 0, 500, 343);
         this.reportPanel.setCreateReportAction(e -> performCreateReport(e));
-        panelReport.add(this.reportPanel);
+        this.travelAllowancePanel = new TravelAllowancePanel(this);        
+        panelReportContent.add(this.reportPanel, BorderLayout.NORTH);
         
         /*** Common ****/
 
@@ -387,6 +392,38 @@ public class MainFrame extends JFrame {
         populateThemeMenuItems(this.mainMenuItemTheme, selectedTheme);
         reloadRecentDatabaseMenu();
         tabbedPane.setSelectedIndex(1);
+    }
+    
+    public void showErrorMessage(String message) { 
+        showErrorMessage(message, AppConstants.ApplicationName);
+    }
+    
+    public void showErrorMessage(Component component, String message) { 
+        showErrorMessage(component, message, AppConstants.ApplicationName);
+    }
+    
+    public void showErrorMessage(String message, String title) {
+        showMessage(message, title, JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public void showErrorMessage(Component component, String message, String title) {
+        showMessage(component, message, title, JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public void showMessage(String message, String title, int messageType) {
+        showMessage(null, message, title, messageType);
+    }
+    
+    public void showMessage(Component component, String message, String title, int messageType) {
+        JOptionPane.showMessageDialog(component != null ? component : this, message, title, messageType);
+    }
+    
+    public boolean askForConfirmation(String message, String title) {
+        return askForConfirmation(null, message, title);
+    }
+    
+    public boolean askForConfirmation(Component component, String message, String title) {
+        return JOptionPane.showConfirmDialog(component != null ? component : this, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
     
     private JPanel createDatePickerPanel(DatePicker datePicker, String caption) {
@@ -487,6 +524,7 @@ public class MainFrame extends JFrame {
         this.buttonNewTripType.setEnabled(enabled);
         this.buttonEditTripType.setEnabled(enabled);
         this.buttonDeleteTripType.setEnabled(enabled);
+        this.travelAllowancePanel.setEnabled(enabled);
         this.reportPanel.setEnabled(enabled);
     }
     
@@ -568,6 +606,7 @@ public class MainFrame extends JFrame {
                 reloadCustomersTable();
                 reloadTripTable();
                 reloadTripTypeTable();
+                this.travelAllowancePanel.reloadTable();
             }
         } catch (Exception ex) {
             Logger.Log(ex);
@@ -581,7 +620,6 @@ public class MainFrame extends JFrame {
 
         var customers = CustomerManager.getCustomers();
         var tripTypes = TripManager.getTripTypes();
-//        this.currentCustomers = createCustomersHashMap(customers);
         this.currentCustomers = createEntityIdHashMap(customers);
         this.currentTripTypes = createEntityIdHashMap(tripTypes);
         if (customers != null && tripTypes != null) {
@@ -666,18 +704,6 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void showErrorMessage(String message) { 
-        showErrorMessage(message, AppConstants.ApplicationName);
-    }
-    
-    private void showErrorMessage(String message, String title) {
-        showMessage(message, title, JOptionPane.ERROR_MESSAGE);
-    }
-    
-    private void showMessage(String message, String title, int messageType) {
-        JOptionPane.showMessageDialog(this, message, title, messageType);
-    }
-
     private void addRecentDatabase(String databasePath) {
         try {
             if (!Strings.isNullOrEmpty(databasePath)) {
@@ -713,10 +739,6 @@ public class MainFrame extends JFrame {
         } catch (Exception ex) {
             Logger.Log(ex);
         }
-    }
-
-    private boolean askForConfirmation(String message, String title) {
-        return JOptionPane.showConfirmDialog(this, message, title, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private static void setLocale(String language, String country) {
@@ -903,7 +925,7 @@ public class MainFrame extends JFrame {
             if (!Strings.isNullOrEmpty(outputDirectory) && !Strings.isNullOrEmpty(outputFileName)) {
                 outputFileName = outputFileName + "_" + DateTimeHelper.toSortableDate(LocalDate.now());
                 
-                var generator = new ReportGenerator(this.currentCustomers, this.currentTripTypes);
+                var generator = new ReportGenerator(this.currentCustomers, this.currentTripTypes, this.travelAllowancePanel.getCachedEntities());
                 boolean success = true;
                 if (configuration.GenerateSimpleYears) {
                     var fileName = outputFileName + "_" + LocalizationProvider.getString("report.filename.suffix.simpleyears") + ".pdf";

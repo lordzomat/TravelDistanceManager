@@ -17,7 +17,7 @@ import de.lordz.java.tools.tdm.common.DateTimeHelper;
 
 @Entity
 @Table(name = "tbTravelAllowance")
-public class TravelAllowance {
+public class TravelAllowance implements IEntityId {
     @Id
     @GeneratedValue(generator = "sqlite_travelallowance")
     @TableGenerator(name = "sqlite_travelallowance", table = "sqlite_sequence", pkColumnName = "name", valueColumnName = "seq", pkColumnValue = "tbTravelAllowance", initialValue = 1, allocationSize = 1)
@@ -72,6 +72,10 @@ public class TravelAllowance {
     }
       
     public LocalDate getValidFromDate() {
+        if (this.validFromDate == null) {
+            this.validFromDate = getLocalDate(this.validFromDateString);
+        }
+        
         return this.validFromDate;
     }
     
@@ -85,6 +89,10 @@ public class TravelAllowance {
     }
       
     public LocalDate getInvalidFromDate() {
+        if (this.invalidFromDate == null) {
+            this.invalidFromDate = getLocalDate(this.invalidFromDateString);
+        }
+        
         return this.invalidFromDate;
     }
         

@@ -67,7 +67,7 @@ public class TripManager {
      * @param start The selection start date if specified.
      * @param end The selection end date if specified.
      * @param sortDesceding If true the selection is sorted descending by date and identifier.
-     * @return Returns a list of trips on success, otherwise null.
+     * @return Returns a list of trips on success, otherwise empty list.
      */
     public static List<Trip> getTrips(LocalDate start, LocalDate end, boolean sortDesceding) {
         List<Trip> result = null;
@@ -158,7 +158,7 @@ public class TripManager {
     /**
      * Gets all available trip types.
      * 
-     * @return Returns a list of trip types on success, otherwise null.
+     * @return Returns a list of trip types on success, otherwise empty list.
      */
     public static List<TripType> getTripTypes() {
         List<TripType> result = null;
@@ -173,6 +173,28 @@ public class TripManager {
 
         if (result == null) {
             result = new ArrayList<TripType>(0);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Gets all available travel allowances
+     * 
+     * @return Returns a list of travel allowances on success, otherwise empty list.
+     */
+    public static List<TravelAllowance> getTravelAllowances() {
+        List<TravelAllowance> result = null;
+        try {
+            if (DatabaseProvider.getIsOpen()) {
+                result = DatabaseProvider.getEntities("SELECT t FROM TravelAllowance t WHERE t.deleted=0", TravelAllowance.class, null);
+            }
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }
+
+        if (result == null) {
+            result = new ArrayList<TravelAllowance>(0);
         }
         
         return result;

@@ -45,27 +45,31 @@ public class ReportGenerator {
     public final static int REPORT_SIMPLE_MONTHS = 2;
     public final static int REPORT_DETAILED = 3;
     
-    final private static DecimalFormat distanceFormat = new DecimalFormat("0.00");
-    final private static int columnCountYears = 14;
-    final private static int columnCountMonths = 2;
-    final private static int columnCountDetailed = 5;
-    final private static Font boldFont = createBoldFont();
-    final private static GrayColor headerColor = new GrayColor(0.8f);
-    final private Rectangle rectangle;
-    final private HashMap<Integer, Customer> customers;
-    final private HashMap<Integer, TripType> tripTypes;
-    final private Locale locale;
+    private final static DecimalFormat distanceFormat = new DecimalFormat("0.00");
+    private final static int columnCountYears = 14;
+    private final static int columnCountMonths = 2;
+    private final static int columnCountDetailed = 5;
+    private final static Font boldFont = createBoldFont();
+    private final static GrayColor headerColor = new GrayColor(0.8f);
+    private final Rectangle rectangle;
+    private final HashMap<Integer, Customer> customers;
+    private final HashMap<Integer, TripType> tripTypes;
+    private final HashMap<Integer, TravelAllowance> travelAllowances;
+    private final Locale locale;
     
     /**
      * Initializes a new report generator class.
      * 
      * @param customers A hash map to lookup customers.
      * @param tripTypes A hash map to lookup trip types.
+     * @param travelAllowances A hash map to lookup travel allowances.
      */
-    public ReportGenerator(HashMap<Integer, Customer> customers, HashMap<Integer, TripType> tripTypes) {
+    public ReportGenerator(HashMap<Integer, Customer> customers, HashMap<Integer, TripType> tripTypes,
+            HashMap<Integer, TravelAllowance> travelAllowances) {
         this.rectangle = PageSize.A4;
         this.customers = customers;
         this.tripTypes = tripTypes;
+        this.travelAllowances = travelAllowances;
         this.locale = LocalizationProvider.getLocale();
     }
     
@@ -400,10 +404,26 @@ public class ReportGenerator {
         return map;
     }
     
-
-    
     private double getTravelAllowanceRate(LocalDate date) {
-        return 0.30;
+        try {
+            if (this.travelAllowances != null) {
+                for (var allowance : this.travelAllowances.values()) {
+                    if (allowance != null) {
+                        var validFrom = allowance.getValidFromDate();
+                        var invalidFrom = allowance.getInvalidFromDate();
+                        if (validFrom != null && invalidFrom != null) {
+                            if (date.isBefore(invalidFrom) && (date.isAfter(validFrom) || date.equals(validFrom))) {
+                                return allowance.getRate();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }
+        
+        return 0.0;
     }
     
     private void addDistanceSum(PdfPTable table, String title, double distance) {
