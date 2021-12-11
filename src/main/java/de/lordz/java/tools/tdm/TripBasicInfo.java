@@ -39,19 +39,18 @@ public class TripBasicInfo extends JPanel {
     private Trip currentTrip;
     private boolean editMode;
     private DatePicker datePicker;
-//    private TimePicker timePicker;
     private JTextArea textAreaDescription;
 
     public TripBasicInfo() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
+        var gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] {100, 250, 0};
         gridBagLayout.rowHeights = new int[] {20, 20, 20, 200, 0};
         gridBagLayout.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
         gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
         setLayout(gridBagLayout);
         
-        JLabel labelCustomer = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.customer"));
-        GridBagConstraints constraintLabelCustomer = new GridBagConstraints();
+        var labelCustomer = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.customer"));
+        var constraintLabelCustomer = new GridBagConstraints();
         constraintLabelCustomer.fill = GridBagConstraints.BOTH;
         constraintLabelCustomer.insets = new Insets(0, 0, 5, 5);
         constraintLabelCustomer.gridx = 0;
@@ -59,7 +58,7 @@ public class TripBasicInfo extends JPanel {
         add(labelCustomer, constraintLabelCustomer);
         
         this.comboBoxCustomer = new JComboBox<Customer>();
-        GridBagConstraints constraintCustomer = new GridBagConstraints();
+        var constraintCustomer = new GridBagConstraints();
         constraintCustomer.fill = GridBagConstraints.BOTH;
         constraintCustomer.insets = new Insets(0, 0, 5, 0);
         constraintCustomer.gridx = 1;
@@ -75,15 +74,15 @@ public class TripBasicInfo extends JPanel {
         add(labelTripType, constraintLabelTripType);
         
         this.comboBoxTripType = new JComboBox<TripType>();
-        GridBagConstraints constraintTripType = new GridBagConstraints();
+        var constraintTripType = new GridBagConstraints();
         constraintTripType.fill = GridBagConstraints.BOTH;
         constraintTripType.insets = new Insets(0, 0, 5, 0);
         constraintTripType.gridx = 1;
         constraintTripType.gridy = 1;
         add(this.comboBoxTripType, constraintTripType);
         
-        JLabel labelDate = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.date"));
-        GridBagConstraints constraintLabelDate = new GridBagConstraints();
+        var labelDate = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.date"));
+        var constraintLabelDate = new GridBagConstraints();
         constraintLabelDate.fill = GridBagConstraints.BOTH;
         constraintLabelDate.insets = new Insets(0, 0, 5, 5);
         constraintLabelDate.gridx = 0;
@@ -92,7 +91,7 @@ public class TripBasicInfo extends JPanel {
         
         var panelDatePicker = new JPanel();
         this.datePicker = DateTimeHelper.createDatePicker();
-        GridBagConstraints constraintDatePicker = new GridBagConstraints();
+        var constraintDatePicker = new GridBagConstraints();
         constraintDatePicker.fill = GridBagConstraints.BOTH;
         constraintDatePicker.insets = new Insets(0, 0, 5, 0);
         constraintDatePicker.gridx = 1;
@@ -100,34 +99,10 @@ public class TripBasicInfo extends JPanel {
         add(panelDatePicker, constraintDatePicker);
         panelDatePicker.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 0));
         panelDatePicker.add(this.datePicker);
-        
-//        JLabel labelTime = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.time"));
-//        GridBagConstraints constraintLabelTime = new GridBagConstraints();
-//        constraintLabelTime.fill = GridBagConstraints.BOTH;
-//        constraintLabelTime.insets = new Insets(0, 0, 5, 5);
-//        constraintLabelTime.gridx = 0;
-//        constraintLabelTime.gridy = 3;
-//        add(labelTime, constraintLabelTime);
-//        
-//        var timeSettings = new TimePickerSettings();
-//        timeSettings.setDisplayToggleTimeMenuButton(false);
-//        timeSettings.setDisplaySpinnerButtons(true);
-//        timeSettings.setInitialTimeToNow();
-//        var panelTimePicker = new JPanel();
-//        this.timePicker = new TimePicker(timeSettings);
-//        GridBagConstraints constraintTimePicker = new GridBagConstraints();
-//        constraintTimePicker.fill = GridBagConstraints.BOTH;
-//        constraintTimePicker.insets = new Insets(0, 0, 5, 0);
-//        constraintTimePicker.gridx = 1;
-//        constraintTimePicker.gridy = 3;
-//        add(panelTimePicker, constraintTimePicker);
-//        panelTimePicker.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 0));
-//        panelTimePicker.add(this.timePicker);
-//        this.timePicker.clear();
-        
+                
         var panelDescription = new JPanel();
         var labelDescription = new JLabel(LocalizationProvider.getString("tripbasicinfo.label.description"));
-        GridBagConstraints constrainctLabelDescription = new GridBagConstraints();
+        var constrainctLabelDescription = new GridBagConstraints();
         constrainctLabelDescription.fill = GridBagConstraints.BOTH;
         constrainctLabelDescription.insets = new Insets(0, 0, 0, 5);
         constrainctLabelDescription.gridx = 0;
@@ -138,7 +113,7 @@ public class TripBasicInfo extends JPanel {
         
         var scrollPane = new JScrollPane();
         this.textAreaDescription = new JTextArea();
-        GridBagConstraints constraintDescription = new GridBagConstraints();
+        var constraintDescription = new GridBagConstraints();
         constraintDescription.fill = GridBagConstraints.BOTH;
         constraintDescription.gridx = 1;
         constraintDescription.gridy = 3;
@@ -190,13 +165,6 @@ public class TripBasicInfo extends JPanel {
             } else {
                 this.datePicker.clear();
             }
-            
-//            var localTime = entity.getLocalTime();
-//            if (localTime != null) {
-//                this.timePicker.setTime(localTime);
-//            } else {
-//                this.timePicker.clear();
-//            }
         } else {
             entity = new Trip();
         }
@@ -210,7 +178,6 @@ public class TripBasicInfo extends JPanel {
             this.comboBoxCustomer.addActionListener(e -> setSelectedCustomer());
             this.comboBoxTripType.addActionListener(e -> setSelectedTripType());
             this.datePicker.addDateChangeListener(e -> setTimeOfTrip());
-//            this.timePicker.addTimeChangeListener(e -> setTimeOfTrip());
         }
     }
 
@@ -224,7 +191,6 @@ public class TripBasicInfo extends JPanel {
         this.comboBoxCustomer.setEnabled(editable);
         this.comboBoxTripType.setEnabled(editable);
         this.datePicker.setEnabled(editable);
-//        this.timePicker.setEnabled(editable);
         this.textAreaDescription.setEditable(editable);
         var border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
         this.textAreaDescription.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(2, 2, 2, 2)));
@@ -251,9 +217,6 @@ public class TripBasicInfo extends JPanel {
     }
     
     private void setTimeOfTrip() {
-//        if (this.datePicker.isTextFieldValid() && this.timePicker.isTextFieldValid()) {
-//            this.currentTrip.setTimeOfTrip(this.datePicker.getDateStringOrEmptyString() + "T" + this.timePicker.getTimeStringOrEmptyString());
-//        }        
         if (this.datePicker.isTextFieldValid()) {
             this.currentTrip.setTimeOfTrip(DateTimeHelper.toSortableDateTime(this.datePicker.getDate()));
         }

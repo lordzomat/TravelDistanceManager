@@ -46,7 +46,7 @@ public class TravelAllowanceDataPanel extends JPanel {
         GridBagConstraints constraintLabelCustomer = new GridBagConstraints();
         constraintLabelCustomer.anchor = GridBagConstraints.WEST;
         constraintLabelCustomer.fill = GridBagConstraints.VERTICAL;
-        constraintLabelCustomer.insets = new Insets(0, 0, 5, 5);
+        constraintLabelCustomer.insets = new Insets(0, 5, 5, 5);
         constraintLabelCustomer.gridx = 0;
         constraintLabelCustomer.gridy = 0;
         add(labelCustomer, constraintLabelCustomer);
@@ -63,7 +63,7 @@ public class TravelAllowanceDataPanel extends JPanel {
         labelValidFrom = new JLabel(Beans.isDesignTime() ? "validfrom" : LocalizationProvider.getString("travelallowancebasicinfo.label.validfrom"));
         GridBagConstraints constraintLabelValidFrom = new GridBagConstraints();
         constraintLabelValidFrom.anchor = GridBagConstraints.WEST;
-        constraintLabelValidFrom.insets = new Insets(0, 0, 5, 5);
+        constraintLabelValidFrom.insets = new Insets(0, 5, 5, 5);
         constraintLabelValidFrom.gridx = 0;
         constraintLabelValidFrom.gridy = 1;
         add(labelValidFrom, constraintLabelValidFrom);
@@ -79,7 +79,7 @@ public class TravelAllowanceDataPanel extends JPanel {
         labelInvalidFrom = new JLabel(Beans.isDesignTime() ? "invalidFrom" : LocalizationProvider.getString("travelallowancebasicinfo.label.invalidfrom"));
         var constraintLabelInvalidFrom = new GridBagConstraints();
         constraintLabelInvalidFrom.anchor = GridBagConstraints.WEST;
-        constraintLabelInvalidFrom.insets = new Insets(0, 0, 0, 5);
+        constraintLabelInvalidFrom.insets = new Insets(0, 5, 0, 5);
         constraintLabelInvalidFrom.gridx = 0;
         constraintLabelInvalidFrom.gridy = 2;
         add(labelInvalidFrom, constraintLabelInvalidFrom);

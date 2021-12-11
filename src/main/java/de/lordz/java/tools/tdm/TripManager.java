@@ -187,7 +187,8 @@ public class TripManager {
         List<TravelAllowance> result = null;
         try {
             if (DatabaseProvider.getIsOpen()) {
-                result = DatabaseProvider.getEntities("SELECT t FROM TravelAllowance t WHERE t.deleted=0", TravelAllowance.class, null);
+                result = DatabaseProvider.getEntities("SELECT t FROM TravelAllowance t WHERE t.deleted=0 ORDER BY t.validFromDateString",
+                        TravelAllowance.class, null);
             }
         } catch (Exception ex) {
             Logger.Log(ex);
@@ -197,6 +198,32 @@ public class TripManager {
             result = new ArrayList<TravelAllowance>(0);
         }
         
+        return result;
+    }
+    
+    /**
+     * Retrieves a travel allowance for the specified date if one exists.
+     * 
+     * @param date The date for which the travel allowance is retrieved.
+     * @return The <CODE>TravelAllowance</CODE> if exists, a empty TravelAllowance if not and <CODE>null</CODE> on error.
+     */
+    public static TravelAllowance getTravelAllowance(LocalDate date) {
+        TravelAllowance result = null;
+        try {
+            if (DatabaseProvider.getIsOpen()) {
+                final var parameters = new ArrayList<AbstractMap.SimpleEntry<String, Object>>(1);
+                parameters.add(new AbstractMap.SimpleEntry<String, Object>("date", DateTimeHelper.toSortableDateTime(date)));
+                result = DatabaseProvider.getEntity(
+                        "SELECT t FROM TravelAllowance t WHERE t.deleted=0 AND t.validFromDateString <= :date AND t.invalidFromDateString > :date",
+                        TravelAllowance.class, parameters);
+                if (result == null) {
+                    result = new TravelAllowance();
+                }
+            }
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }
+
         return result;
     }
 }

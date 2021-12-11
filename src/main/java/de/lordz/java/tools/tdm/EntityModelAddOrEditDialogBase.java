@@ -6,15 +6,17 @@ import java.awt.Dialog;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import de.lordz.java.tools.tdm.common.IUserNotificationHandler;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
 import de.lordz.java.tools.tdm.entities.IEntityId;
-import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.IconCode;
 import jiconfont.swing.IconFontSwing;
 
 /**
@@ -28,36 +30,39 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
 
     private static final long serialVersionUID = -6946143668242451743L;
     private final JButton buttonOk;
+    private final IUserNotificationHandler userNotificationHandler;
     private T currentEntity;
     private boolean dataSaved;
 
     /**
      * Initializes a new instance of the <CODE>EntityModelAddOrEditDialogBase</CODE> class.
+     * 
+     * @param iconCode The <CODE>IconCode</CODE> of the dialog.
+     * @param userNotificationHandler the user notification handler.
      */
-    public EntityModelAddOrEditDialogBase() {
+    public EntityModelAddOrEditDialogBase(IconCode iconCode, IUserNotificationHandler userNotificationHandler) throws IllegalArgumentException {
+        if (userNotificationHandler == null) {
+            throw new IllegalArgumentException("User notification handler is required!");
+        }
+        
+        this.userNotificationHandler = userNotificationHandler;
         setBounds(100, 100, 400, 200);
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        setIconImage(IconFontSwing.buildImage(FontAwesome.MONEY, 15, Color.lightGray));
+        setIconImage(IconFontSwing.buildImage(iconCode, 15, Color.lightGray));
         getContentPane().setLayout(new BorderLayout());
-        {
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-            {
-                this.buttonOk = new JButton(LocalizationProvider.getString("mainframe.button.accept"));
-                this.buttonOk.setActionCommand("OK");
-                this.buttonOk.addActionListener(e -> performButtonClick(e));
-                buttonPane.add(this.buttonOk);
-                getRootPane().setDefaultButton(this.buttonOk);
-            }
-            {
-                JButton cancelButton = new JButton(LocalizationProvider.getString("mainframe.button.cancel"));
-                cancelButton.setActionCommand("Cancel");
-                cancelButton.addActionListener(e -> performButtonClick(e));
-                buttonPane.add(cancelButton);
-            }
-        }
+        var buttonPane = new JPanel();
+        buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        getContentPane().add(buttonPane, BorderLayout.SOUTH);
+        this.buttonOk = new JButton(LocalizationProvider.getString("mainframe.button.accept"));
+        this.buttonOk.setActionCommand("OK");
+        this.buttonOk.addActionListener(e -> performButtonClick(e));
+        buttonPane.add(this.buttonOk);
+        getRootPane().setDefaultButton(this.buttonOk);
+        var cancelButton = new JButton(LocalizationProvider.getString("mainframe.button.cancel"));
+        cancelButton.setActionCommand("Cancel");
+        cancelButton.addActionListener(e -> performButtonClick(e));
+        buttonPane.add(cancelButton);
     }
 
     /**
@@ -84,7 +89,9 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
      * @param component The component to set.
      */
     protected void setDataComponent(Component component) {
-        getContentPane().add(component, BorderLayout.NORTH);
+        var panel = new JPanel(new BorderLayout(0,0));
+        panel.add(component, BorderLayout.WEST);
+        getContentPane().add(panel, BorderLayout.NORTH);
     }
     
     /**
@@ -103,6 +110,15 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
      */
     protected T getEntity() {
         return this.currentEntity;
+    }
+    
+    /**
+     * Shows a error message to the user.
+     * 
+     * @param message
+     */
+    protected void showErrorMessage(String message) {
+        this.userNotificationHandler.showErrorMessage(this, message, getTitle());
     }
     
     /**

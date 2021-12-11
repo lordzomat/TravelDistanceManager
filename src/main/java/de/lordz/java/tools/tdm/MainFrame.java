@@ -9,10 +9,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -43,6 +43,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
 import jiconfont.icons.font_awesome.FontAwesome;
 import jiconfont.swing.IconFontSwing;
 import javax.swing.JTable;
@@ -54,41 +58,27 @@ import javax.swing.JToolBar;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.SpringLayout;
 
 public class MainFrame extends JFrame implements IUserNotificationHandler {
 
     private static final long serialVersionUID = 404497382974994431L;
-    private static final DefaultTableCellRenderer RightTableCellRenderer = CreateTableCellRightRenderer();
     private final Icon selectedThemeCheckIcon;
     private AppConfiguration appConfiguration;
     private JPanel contentPane;
     private JMenu mainMenuItemTheme;
     private StatusBar statusBar;
-    private JTable tableCustomers;
     private JTable tableTrips;
-    private JTable tableTripTypes;
-    private HashMap<Integer, EntityDataModelHelper<Customer>> customersColumnMap = createCustomersColumnMap();
     private HashMap<Integer, EntityDataModelHelper<Trip>> tripsColumnMap = createTripsColumnMap();
-    private HashMap<Integer, EntityDataModelHelper<TripType>> tripTypesColumnMap = createTripTypesColumnMap();
-    private JButton buttonNewCustomer;
-    private JButton buttonEditCustomer;
-    private JButton buttonDeleteCustomer;
     private JButton buttonNewTrip;
     private JButton buttonEditTrip;
     private JButton buttonDeleteTrip;
     private JToggleButton toggleButtonTripFilterEnabled;
     private DatePicker datePickerTripFilterStart;
     private DatePicker datePickerTripFilterEnd;
-    private JButton buttonNewTripType;
-    private JButton buttonEditTripType;
-    private JButton buttonDeleteTripType;    
     private JMenu fileMenuRecentDatabases;
-    private HashMap<Integer, Customer> currentCustomers;
-    private HashMap<Integer, TripType> currentTripTypes;
-    private CustomerBasicInfo customerBasicInfo;
     private TripBasicInfo tripBasicInfo;
-    private TripTypeBasicInfo tripTypeBasicInfo;
+    private CustomerPanel customerPanel;
+    private TripTypePanel tripTypePanel;
     private TravelAllowancePanel travelAllowancePanel;
     private ReportPanel reportPanel;
 
@@ -173,64 +163,9 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
 
         /*** Customers ****/
         
-        JPanel panelCustomers = new JPanel();
-        panelCustomers.setLayout(new BorderLayout(0, 0));
-        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), panelCustomers,
-                LocalizationProvider.getString("mainframe.button.tooltip.customers"));
-
-        JScrollPane scrollPaneCustomers = new JScrollPane();
-        panelCustomers.add(scrollPaneCustomers, BorderLayout.WEST);
-
-        this.tableCustomers = new JTable();
-//		tableCustomers.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        this.tableCustomers.setShowGrid(true);
-        this.tableCustomers.setColumnSelectionAllowed(false);
-        this.tableCustomers.setDragEnabled(false);
-        this.tableCustomers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        this.tableCustomers.getTableHeader().setReorderingAllowed(false);
-        this.tableCustomers.getSelectionModel().addListSelectionListener(e -> processTableCustomerSelectionChanged(e));
-        scrollPaneCustomers.setViewportView(this.tableCustomers);
-        scrollPaneCustomers.setPreferredSize(new Dimension(400, 100));
-
-        JPanel panelCustomersRight = new JPanel();
-        panelCustomers.add(panelCustomersRight, BorderLayout.CENTER);
-        panelCustomersRight.setLayout(new BorderLayout(0, 0));
-
-        JToolBar toolBar = new JToolBar();
-        toolBar.setFloatable(false);
-        panelCustomersRight.add(toolBar, BorderLayout.NORTH);
-
-        this.buttonNewCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
-        this.buttonNewCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
-        this.buttonNewCustomer.addActionListener(e -> openCustomerDialog(null));
-        toolBar.add(this.buttonNewCustomer);
-
-        this.buttonEditCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.PENCIL_SQUARE, 20, Color.ORANGE));
-        this.buttonEditCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.edit"));
-        this.buttonEditCustomer.addActionListener(e -> processCustomerEditDeleteClick(true));
-        toolBar.add(this.buttonEditCustomer);
-
-        this.buttonDeleteCustomer = new JButton(IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
-        this.buttonDeleteCustomer.setToolTipText(LocalizationProvider.getString("mainframe.button.delete"));
-        this.buttonDeleteCustomer.addActionListener(e -> processCustomerEditDeleteClick(false));
-        toolBar.add(this.buttonDeleteCustomer);
-
-        JPanel panelCustomerInfo = new JPanel();
-        panelCustomersRight.add(panelCustomerInfo, BorderLayout.CENTER);
-        SpringLayout panelCustomerInfoSpringLayout = new SpringLayout();
-        panelCustomerInfo.setLayout(panelCustomerInfoSpringLayout);
-
-        this.customerBasicInfo = new CustomerBasicInfo();
-        panelCustomerInfoSpringLayout.putConstraint(SpringLayout.NORTH, this.customerBasicInfo, 10, SpringLayout.NORTH,
-                panelCustomerInfo);
-        panelCustomerInfoSpringLayout.putConstraint(SpringLayout.WEST, this.customerBasicInfo, 10, SpringLayout.WEST,
-                panelCustomerInfo);
-        panelCustomerInfoSpringLayout.putConstraint(SpringLayout.SOUTH, this.customerBasicInfo, 382, SpringLayout.NORTH,
-                panelCustomerInfo);
-        panelCustomerInfoSpringLayout.putConstraint(SpringLayout.EAST, this.customerBasicInfo, 569, SpringLayout.WEST,
-                panelCustomerInfo);
-        panelCustomerInfo.add(this.customerBasicInfo);
-        this.customerBasicInfo.setEditable(false);
+        this.customerPanel = new CustomerPanel(this);
+        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), this.customerPanel,
+                LocalizationProvider.getString("mainframe.button.tooltip.customers"));        
         
         /*** Trips ****/
         
@@ -305,54 +240,32 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         
         /*** Trips ****/
         
-        JPanel panelTripTypes = new JPanel();
-        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FOLDER_O, 15, Color.lightGray), panelTripTypes,
-                LocalizationProvider.getString("mainframe.button.tooltip.triptypes"));
-        panelTripTypes.setLayout(new BorderLayout(0, 0));
-        
-        JScrollPane scrollPaneTripTypes = new JScrollPane();
-        panelTripTypes.add(scrollPaneTripTypes, BorderLayout.WEST);
-        this.tableTripTypes = new JTable();
-        this.tableTripTypes.setShowGrid(true);
-        this.tableTripTypes.setColumnSelectionAllowed(false);
-        this.tableTripTypes.setDragEnabled(false);
-        this.tableTripTypes.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        this.tableTripTypes.getTableHeader().setReorderingAllowed(false);
-        this.tableTripTypes.getSelectionModel().addListSelectionListener(e -> processTableTripTypesSelectionChanged(e));
-        scrollPaneTripTypes.setViewportView(this.tableTripTypes);
-        scrollPaneTripTypes.setPreferredSize(new Dimension(400, 100));
-        
-        JPanel panelTripTypesRight = new JPanel();
-        panelTripTypes.add(panelTripTypesRight, BorderLayout.CENTER);
-        panelTripTypesRight.setLayout(new BorderLayout(0, 0));
-        
-        JToolBar toolBarTripTypes = new JToolBar();
-        toolBarTripTypes.setFloatable(false);
-        panelTripTypesRight.add(toolBarTripTypes, BorderLayout.NORTH);
-        
-        this.buttonNewTripType = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
-        this.buttonNewTripType.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
-        this.buttonNewTripType.addActionListener(e -> openTripTypeDialog(null));
-        toolBarTripTypes.add(this.buttonNewTripType);
-        
-        this.buttonEditTripType = new JButton(IconFontSwing.buildIcon(FontAwesome.PENCIL_SQUARE, 20, Color.ORANGE));
-        this.buttonEditTripType.setToolTipText(LocalizationProvider.getString("mainframe.button.edit"));
-        this.buttonEditTripType.addActionListener(e -> processTripTypeEditDeleteClick(true));
-        toolBarTripTypes.add(this.buttonEditTripType);
-        
-        this.buttonDeleteTripType = new JButton(IconFontSwing.buildIcon(FontAwesome.MINUS_CIRCLE, 20, new Color(150, 0, 0)));
-        this.buttonDeleteTripType.setToolTipText(LocalizationProvider.getString("mainframe.button.delete"));
-        this.buttonDeleteTripType.addActionListener(e -> processTripTypeEditDeleteClick(false));
-        toolBarTripTypes.add(this.buttonDeleteTripType);
-        
-        JPanel panelTripTypeInfo = new JPanel();
-        panelTripTypesRight.add(panelTripTypeInfo, BorderLayout.CENTER);
-        panelTripTypeInfo.setLayout(null);
-        
-        this.tripTypeBasicInfo = new TripTypeBasicInfo();
-        this.tripTypeBasicInfo.setBounds(10, 11, 329, 37);
-        this.tripTypeBasicInfo.setEditable(false);
-        panelTripTypeInfo.add(this.tripTypeBasicInfo);
+        GridBagLayout gridBagLayout = new GridBagLayout();
+        gridBagLayout.columnWidths = new int[] { 0 };
+        gridBagLayout.rowHeights = new int[] {0, 0};
+        gridBagLayout.columnWeights = new double[]{ 1.0 };
+        gridBagLayout.rowWeights = new double[]{0.5, 0.5};
+        var panelGeneralData = new JPanel(gridBagLayout);        
+        tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.COG, 15, Color.lightGray), panelGeneralData,
+                LocalizationProvider.getString("mainframe.button.tooltip.commondata"));
+        this.travelAllowancePanel = new TravelAllowancePanel(this);
+        this.travelAllowancePanel.setBorder(new TitledBorder(null, LocalizationProvider.getString("mainframe.panel.title.travelallowance"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        var constraintTripTypes = new GridBagConstraints();
+        constraintTripTypes.anchor = GridBagConstraints.WEST;
+        constraintTripTypes.fill = GridBagConstraints.BOTH;
+        constraintTripTypes.insets = new Insets(0, 0, 5, 5);
+        constraintTripTypes.gridx = 0;
+        constraintTripTypes.gridy = 0;
+        var constraintTravelAllowances = new GridBagConstraints();
+        constraintTravelAllowances.anchor = GridBagConstraints.WEST;
+        constraintTravelAllowances.fill = GridBagConstraints.BOTH;
+        constraintTravelAllowances.insets = new Insets(0, 0, 5, 5);
+        constraintTravelAllowances.gridx = 0;
+        constraintTravelAllowances.gridy = 1;
+        this.tripTypePanel = new TripTypePanel(this);
+        this.tripTypePanel.setBorder(new TitledBorder(null, LocalizationProvider.getString("mainframe.panel.title.triptypes"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        panelGeneralData.add(this.tripTypePanel, constraintTripTypes);
+        panelGeneralData.add(this.travelAllowancePanel, constraintTravelAllowances);
         
         /*** Reports ****/
         
@@ -365,7 +278,6 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         this.reportPanel = new ReportPanel((message, title) -> showErrorMessage(message, title));
         this.reportPanel.setBounds(0, 0, 500, 343);
         this.reportPanel.setCreateReportAction(e -> performCreateReport(e));
-        this.travelAllowancePanel = new TravelAllowancePanel(this);        
         panelReportContent.add(this.reportPanel, BorderLayout.NORTH);
         
         /*** Common ****/
@@ -437,12 +349,6 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         panel.setMaximumSize(new Dimension(150, 25));
         datePicker.setBorder(border);
         return panel;
-    }    
-    
-    private void openCustomerDialog(Customer entity) {
-        var cutomerDialog = new CustomerDialog();
-        cutomerDialog.showDialog(entity, this);
-        reloadCustomersTable();
     }
 
     private void populateThemeMenuItems(JMenu mainMenuItem, String selectedTheme) {
@@ -513,17 +419,16 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
     }
     
     private void updateShowTableGrid() {
-        this.tableCustomers.setShowGrid(true);
+        this.customerPanel.setShowGrid(true);
+        this.tripTypePanel.setShowGrid(true);
+        this.travelAllowancePanel.setShowGrid(true);
         this.tableTrips.setShowGrid(true);
     }
     
     private void setActionButtonsEnabledState(boolean enabled) {
-        this.buttonNewCustomer.setEnabled(enabled);
-        this.buttonEditCustomer.setEnabled(enabled);
-        this.buttonDeleteCustomer.setEnabled(enabled);
-        this.buttonNewTripType.setEnabled(enabled);
-        this.buttonEditTripType.setEnabled(enabled);
-        this.buttonDeleteTripType.setEnabled(enabled);
+        this.customerPanel.setEnabled(enabled);
+        setTripActionButtonsEnabledState(enabled);
+        this.tripTypePanel.setEnabled(enabled);
         this.travelAllowancePanel.setEnabled(enabled);
         this.reportPanel.setEnabled(enabled);
     }
@@ -603,98 +508,14 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
                 }
 
                 openDatabaseAsync(databasePath, this.statusBar);
-                reloadCustomersTable();
+                this.customerPanel.reloadTable();
                 reloadTripTable();
-                reloadTripTypeTable();
+                this.tripTypePanel.reloadTable();
                 this.travelAllowancePanel.reloadTable();
             }
         } catch (Exception ex) {
             Logger.Log(ex);
         }
-    }
-
-    private void reloadCustomersTable() {
-        if (!DatabaseProvider.getIsOpen()) {
-            return;
-        }
-
-        var customers = CustomerManager.getCustomers();
-        var tripTypes = TripManager.getTripTypes();
-        this.currentCustomers = createEntityIdHashMap(customers);
-        this.currentTripTypes = createEntityIdHashMap(tripTypes);
-        if (customers != null && tripTypes != null) {
-            setTripActionButtonsEnabledState(customers.size() > 0);
-            this.tripBasicInfo.reloadReferenceData(customers, tripTypes);
-            this.tableCustomers.setModel(new EntityTableModel<Customer>(customers, this.customersColumnMap));
-            var columnModel = this.tableCustomers.getColumnModel();
-            if (columnModel != null && columnModel.getColumnCount() > 2) {
-                var columnDistance = columnModel.getColumn(2);
-                if (columnDistance != null) {
-                    columnDistance.setMaxWidth(100);
-                    columnDistance.setMinWidth(100);
-                    columnDistance.setCellRenderer(RightTableCellRenderer);
-                }
-            }
-        }
-    }
-
-    private void processTableCustomerSelectionChanged(ListSelectionEvent event) {
-        if (event != null && event.getValueIsAdjusting()) {
-            return;
-        }
-
-        var entity = getSelectedCustomerEntity();
-        fillCustomerInfo(entity == null ? new Customer() : entity);
-    }
-
-    private void processCustomerEditDeleteClick(boolean edit) {
-        var entity = getSelectedCustomerEntity();
-        var title = edit ? LocalizationProvider.getString("mainframe.button.edit")
-                : LocalizationProvider.getString("mainframe.button.delete");
-        if (entity != null && entity.getId() > 0) {
-            if (edit) {
-                openCustomerDialog(entity);
-            } else {
-                var message = String.format(LocalizationProvider.getString("mainframe.message.confirmcustomerdelete"), entity.getName());
-
-                if (askForConfirmation(message, title)) {
-                    if (!TripManager.checkIsCustomerAssignd(entity.getId())) {
-                        entity.setDeleted();
-                        DatabaseProvider.updateEntity(entity);
-                        reloadCustomersTable();
-                    } else {
-                        showErrorMessage(LocalizationProvider.getString("customerdialog.message.deletenotpossiblestillinuse"), title);
-                    }
-                }
-            }
-        } else {
-            showErrorMessage(LocalizationProvider.getString("mainframe.message.nocustomerselected"), title);
-        }
-    }
-
-    private Customer getSelectedCustomerEntity() {
-        return getSelectedEntity(this.tableCustomers, Customer.class);
-    }
-
-    private void fillCustomerInfo(Customer entity) {
-        this.customerBasicInfo.fillFromEnity(entity);
-    }
-
-    private static HashMap<Integer, EntityDataModelHelper<Customer>> createCustomersColumnMap() {
-        HashMap<Integer, EntityDataModelHelper<Customer>> columnMap = new HashMap<Integer, EntityDataModelHelper<Customer>>();
-        columnMap.put(0, new EntityDataModelHelper<Customer>(
-                LocalizationProvider.getString("customerdialog.label.name"), (entity) -> entity.getName()));
-        columnMap.put(1, new EntityDataModelHelper<Customer>(
-                LocalizationProvider.getString("customerdialog.label.city"), (entity) -> entity.getCity()));
-        columnMap.put(2, new EntityDataModelHelper<Customer>(
-                LocalizationProvider.getString("customerdialog.label.distance"), (entity) -> entity.getDistance()));
-        return columnMap;
-    }
-
-    private static DefaultTableCellRenderer CreateTableCellRightRenderer() {
-        var rightRenderer = new DefaultTableCellRenderer();
-        rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
-        return rightRenderer;
     }
 
     private void saveConfiguration() {
@@ -755,7 +576,7 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
     }
     
     private String lookupCustomerName(int customerId) {
-        var customers = this.currentCustomers;       
+        var customers = this.customerPanel.getCachedEntities();       
         if (customers != null && customers.containsKey(customerId)) {
             var customer = customers.get(customerId);
             if (customer != null) {
@@ -767,8 +588,10 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
     }
     
     private void openTripDialog(Trip entity) {
-        if (this.currentCustomers != null && this.currentTripTypes != null) {        
-            var tripDialog = new TripDialog(this.currentCustomers.values(), this.currentTripTypes.values());
+        var cachedCustomers = this.customerPanel.getCachedEntities();
+        var cachedTripTypes = this.tripTypePanel.getCachedEntities();
+        if (cachedCustomers != null && cachedTripTypes != null) {        
+            var tripDialog = new TripDialog(cachedCustomers.values(), cachedTripTypes.values());
             tripDialog.showDialog(entity, this);
             reloadTripTable();
         }
@@ -861,58 +684,6 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         }
     }
     
-    private void openTripTypeDialog(TripType entity) {
-        var dialog = new TripTypeDialog();
-        dialog.showDialog(entity, this);
-        reloadTripTypeTable();
-    }
-   
-    private void reloadTripTypeTable() {
-        if (!DatabaseProvider.getIsOpen()) {
-            return;
-        }
-
-        var tripTypes = TripManager.getTripTypes();
-        this.tableTripTypes.setModel(new EntityTableModel<TripType>(tripTypes, this.tripTypesColumnMap));
-    }
-    
-    private void processTableTripTypesSelectionChanged(ListSelectionEvent event) {
-        if (event != null && event.getValueIsAdjusting()) {
-            return;
-        }
-
-        var entity = getSelectedTripType();
-        this.tripTypeBasicInfo.fillFromEnity((entity == null ? new TripType() : entity));
-    }
-    
-    private TripType getSelectedTripType() {
-        return getSelectedEntity(this.tableTripTypes, TripType.class);
-    }
-    
-    private void processTripTypeEditDeleteClick(boolean edit) {
-        var entity = getSelectedTripType();
-        var title = edit ? LocalizationProvider.getString("mainframe.button.edit")
-                : LocalizationProvider.getString("mainframe.button.delete");
-        if (entity != null && entity.getId() > 0) {
-            if (edit) {
-                openTripTypeDialog(entity);
-            } else {
-                var message = String.format(LocalizationProvider.getString("mainframe.message.confirmtriptypedelete"), entity.getName());
-                if (askForConfirmation(message, LocalizationProvider.getString("mainframe.button.delete"))) {
-                    if (!TripManager.checkIsTripTypeAssigned(entity.getId())) {
-                        entity.setDeleted();
-                        DatabaseProvider.updateEntity(entity);
-                        reloadTripTypeTable();
-                    } else {
-                        showErrorMessage(LocalizationProvider.getString("triptypedialog.message.deletenotpossiblestillinuse"), title);
-                    }                    
-                }
-            }
-        } else {
-            showErrorMessage(LocalizationProvider.getString("mainframe.message.notriptypeselected"), title);
-        }
-    }
-    
     private boolean createReportAsync(ReportConfiguration configuration) {
         boolean result = false;
         if (configuration == null) {
@@ -925,7 +696,8 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
             if (!Strings.isNullOrEmpty(outputDirectory) && !Strings.isNullOrEmpty(outputFileName)) {
                 outputFileName = outputFileName + "_" + DateTimeHelper.toSortableDate(LocalDate.now());
                 
-                var generator = new ReportGenerator(this.currentCustomers, this.currentTripTypes, this.travelAllowancePanel.getCachedEntities());
+                var generator = new ReportGenerator(this.customerPanel.getCachedEntities(), this.tripTypePanel.getCachedEntities(),
+                        this.travelAllowancePanel.getCachedEntities());
                 boolean success = true;
                 if (configuration.GenerateSimpleYears) {
                     var fileName = outputFileName + "_" + LocalizationProvider.getString("report.filename.suffix.simpleyears") + ".pdf";
@@ -999,28 +771,6 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         } catch (Exception ex) {
             Logger.Log(ex);
         }
-    }
-    
-    private HashMap<Integer, EntityDataModelHelper<TripType>> createTripTypesColumnMap() {
-        HashMap<Integer, EntityDataModelHelper<TripType>> columnMap = new HashMap<Integer, EntityDataModelHelper<TripType>>();
-        columnMap.put(0, new EntityDataModelHelper<TripType>(
-                LocalizationProvider.getString("triptypebasicinfo.label.name"), (entity) -> entity.getName()));
-        return columnMap;
-    }
-        
-    private <T extends IEntityId> HashMap<Integer, T> createEntityIdHashMap(List<T> entities) {
-        if (entities != null) {
-            var hashMap = new HashMap<Integer, T>(entities.size());
-            for (var entity : entities) {
-                if (entity != null) {
-                    hashMap.put(entity.getId(), entity);
-                }
-            }
-            
-            return hashMap;
-        }
-        
-        return new HashMap<Integer, T>(0);
     }
 
     private class ThemeEntry {

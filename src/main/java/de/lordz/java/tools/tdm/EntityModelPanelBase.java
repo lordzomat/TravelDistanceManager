@@ -14,6 +14,7 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.entities.IEntityId;
@@ -23,6 +24,8 @@ import jiconfont.swing.IconFontSwing;
 public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
     
     private static final long serialVersionUID = -2612431145357781452L;
+    protected static final DefaultTableCellRenderer RightTableCellRenderer = CreateTableCellRightRenderer();
+    
     private final JButton buttonNew;
     private final JButton buttonEdit;
     private final JButton buttonDelete;
@@ -31,7 +34,7 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
     private final JTable table;
     private Component contentComponent;
     private HashMap<Integer, T> cachedEntities;
-        
+    
     public EntityModelPanelBase(Class<? extends T> entityType) {
         this.entityType = entityType;
         setLayout(new BorderLayout(0, 0));
@@ -84,6 +87,15 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
      */
     public void reloadTable() {
         performReloadTableViewModel();
+    }
+    
+    /**
+     * Sets whether the table draws grid lines around cells
+     * 
+     * @param showGrid If <CODE>true</CODE> shows the grid lines otherwise not.
+     */
+    public void setShowGrid(boolean showGrid) {
+        this.table.setShowGrid(showGrid);
     }
     
     /**
@@ -175,5 +187,11 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
         }
         
         return new HashMap<Integer, T>(0);
+    }
+    
+    private static DefaultTableCellRenderer CreateTableCellRightRenderer() {
+        var rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
+        return rightRenderer;
     }
 }

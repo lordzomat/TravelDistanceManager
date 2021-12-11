@@ -24,6 +24,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
     private final TravelAllowanceDataPanel allowanceData;
     private final Component mainWindow;  
     private final IUserNotificationHandler userNotificationHandler;
+    private final TravelAllowanceDialog dialog;
     
     /**
      * Initializes a new instance of the <CODE>TravelAllowancePanel</CODE> class.
@@ -38,6 +39,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
         }
         
         this.mainWindow = mainWindow;
+        this.dialog = new TravelAllowanceDialog(this.userNotificationHandler);
         this.allowanceData = new TravelAllowanceDataPanel();
         this.allowanceData.setEditable(false);
         setContentComponent(this.allowanceData);
@@ -65,7 +67,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
                 }
             }
         } else {            
-            this.userNotificationHandler.showErrorMessage(LocalizationProvider.getString("mainframe.message.notripselected"), title);
+            this.userNotificationHandler.showErrorMessage(LocalizationProvider.getString("mainframe.message.notravelallowaneselected"), title);
         }
     }
 
@@ -99,8 +101,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
     }
     
     private void openDialog(TravelAllowance entity) {
-        var dialog = new TravelAllowanceDialog(this.userNotificationHandler);
-        dialog.showDialog(entity, this.mainWindow);
+        this.dialog.showDialog(entity, this.mainWindow);
         reloadTable();
     }
 
