@@ -21,7 +21,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
 
     private static final long serialVersionUID = -4717340337935228403L;
     private static final HashMap<Integer, EntityDataModelHelper<TravelAllowance>> columnMap = createColumnMap();
-    private final TravelAllowanceDataPanel allowanceData;
+    private final TravelAllowanceDataPanel travelAllowanceDataPanel;
     private final Component mainWindow;  
     private final IUserNotificationHandler userNotificationHandler;
     private final TravelAllowanceDialog dialog;
@@ -40,9 +40,9 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
         
         this.mainWindow = mainWindow;
         this.dialog = new TravelAllowanceDialog(this.userNotificationHandler);
-        this.allowanceData = new TravelAllowanceDataPanel();
-        this.allowanceData.setEditable(false);
-        setContentComponent(this.allowanceData);
+        this.travelAllowanceDataPanel = new TravelAllowanceDataPanel();
+        this.travelAllowanceDataPanel.setEditable(false);
+        setContentComponent(this.travelAllowanceDataPanel);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
     @Override
     protected void performTableSelectionChanged(ListSelectionEvent event) {
         var entity = getSelectedEntity();
-        this.allowanceData.fillFromEnity((entity == null ? new TravelAllowance() : entity));
+        this.travelAllowanceDataPanel.fillFromEnity((entity == null ? new TravelAllowance() : entity));
         
     }
     

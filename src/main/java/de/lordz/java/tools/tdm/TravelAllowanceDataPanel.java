@@ -1,14 +1,8 @@
 package de.lordz.java.tools.tdm;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.entities.TravelAllowance;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.beans.Beans;
 import javax.swing.JTextField;
 import com.github.lgooddatepicker.components.DatePicker;
@@ -20,7 +14,7 @@ import com.google.common.base.Strings;
  * @author lordzomat
  *
  */
-public class TravelAllowanceDataPanel extends JPanel {
+public class TravelAllowanceDataPanel extends GridBagDataPanelBase {
 
     private static final long serialVersionUID = -8141107873337917764L;
     private TravelAllowance currentEntity;
@@ -28,72 +22,26 @@ public class TravelAllowanceDataPanel extends JPanel {
     private JTextField textFieldValue;
     private DatePicker datePickerValidFrom;
     private DatePicker datePickerInvalidFrom;
-    private JLabel labelValidFrom;
-    private JLabel labelInvalidFrom;
 
     /**
      * Initializes a new instance of the <CODE>TravelAllowanceDataPanel</CODE> class.
      */
     public TravelAllowanceDataPanel() {
-        GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {100, 150};
-        gridBagLayout.rowHeights = new int[] {20, 20, 0};
-        gridBagLayout.columnWeights = new double[]{0.0, 1.0};
-        gridBagLayout.rowWeights = new double[]{0.0, 1.0, 1.0};
-        setLayout(gridBagLayout);
-        
-        JLabel labelCustomer = new JLabel(Beans.isDesignTime() ? "value" : LocalizationProvider.getString("travelallowancebasicinfo.label.value"));
-        GridBagConstraints constraintLabelCustomer = new GridBagConstraints();
-        constraintLabelCustomer.anchor = GridBagConstraints.WEST;
-        constraintLabelCustomer.fill = GridBagConstraints.VERTICAL;
-        constraintLabelCustomer.insets = new Insets(0, 5, 5, 5);
-        constraintLabelCustomer.gridx = 0;
-        constraintLabelCustomer.gridy = 0;
-        add(labelCustomer, constraintLabelCustomer);
-        
+        super(new int[] { 100, 150 }, new int[] { 20, 20, 0 }, new double[] { 0.0, 1.0 }, new double[] { 0.0, 1.0, 1.0 });
         this.textFieldValue = new JTextField();
-        GridBagConstraints constraintName = new GridBagConstraints();
-        constraintName.anchor = GridBagConstraints.WEST;
-        constraintName.insets = new Insets(0, 0, 5, 0);
-        constraintName.gridx = 1;
-        constraintName.gridy = 0;
-        add(this.textFieldValue, constraintName);
         this.textFieldValue.setColumns(10);
-        
-        labelValidFrom = new JLabel(Beans.isDesignTime() ? "validfrom" : LocalizationProvider.getString("travelallowancebasicinfo.label.validfrom"));
-        GridBagConstraints constraintLabelValidFrom = new GridBagConstraints();
-        constraintLabelValidFrom.anchor = GridBagConstraints.WEST;
-        constraintLabelValidFrom.insets = new Insets(0, 5, 5, 5);
-        constraintLabelValidFrom.gridx = 0;
-        constraintLabelValidFrom.gridy = 1;
-        add(labelValidFrom, constraintLabelValidFrom);
-        
+        AddLabel(0, 0, Beans.isDesignTime() ? "value" : LocalizationProvider.getString("travelallowancebasicinfo.label.value"));
+        AddInput(1, 0, this.textFieldValue);
         this.datePickerValidFrom = Beans.isDesignTime() ? new DatePicker() : DateTimeHelper.createDatePicker();
-        GridBagConstraints constraintDatePickerValidFrom = new GridBagConstraints();
-        constraintDatePickerValidFrom.anchor = GridBagConstraints.NORTHWEST;
-        constraintDatePickerValidFrom.insets = new Insets(0, 0, 5, 0);
-        constraintDatePickerValidFrom.gridx = 1;
-        constraintDatePickerValidFrom.gridy = 1;
-        add(this.datePickerValidFrom, constraintDatePickerValidFrom);
-        
-        labelInvalidFrom = new JLabel(Beans.isDesignTime() ? "invalidFrom" : LocalizationProvider.getString("travelallowancebasicinfo.label.invalidfrom"));
-        var constraintLabelInvalidFrom = new GridBagConstraints();
-        constraintLabelInvalidFrom.anchor = GridBagConstraints.WEST;
-        constraintLabelInvalidFrom.insets = new Insets(0, 5, 0, 5);
-        constraintLabelInvalidFrom.gridx = 0;
-        constraintLabelInvalidFrom.gridy = 2;
-        add(labelInvalidFrom, constraintLabelInvalidFrom);
-        
+        AddLabel(0, 1, Beans.isDesignTime() ? "value" : LocalizationProvider.getString("travelallowancebasicinfo.label.validfrom"));
+        AddInput(1, 1, this.datePickerValidFrom);
         this.datePickerInvalidFrom = Beans.isDesignTime() ? new DatePicker() : DateTimeHelper.createDatePicker();
-        var constraintDatePickerInvalidFrom = new GridBagConstraints();
-        constraintDatePickerInvalidFrom.anchor = GridBagConstraints.NORTHWEST;
-        constraintDatePickerInvalidFrom.gridx = 1;
-        constraintDatePickerInvalidFrom.gridy = 2;
-        add(this.datePickerInvalidFrom, constraintDatePickerInvalidFrom);
+        AddLabel(0, 2, Beans.isDesignTime() ? "value" : LocalizationProvider.getString("travelallowancebasicinfo.label.invalidfrom"));
+        AddInput(1, 2, this.datePickerInvalidFrom);
     }
 
     /**
-     * Fills in the trip entity data.
+     * Fills in the travel allowance entity data.
      * 
      * @param customer The entity from which the data is taken.
      */

@@ -70,7 +70,7 @@ public class CustomerDataPanel extends GridBagDataPanelBase {
     }
 
     /**
-     * Fills in the trip entity data.
+     * Fills in the customer entity data.
      * 
      * @param customer The entity from which the data is taken.
      */

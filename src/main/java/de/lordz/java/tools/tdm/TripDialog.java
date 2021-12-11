@@ -1,123 +1,81 @@
 package de.lordz.java.tools.tdm;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
+import java.awt.Component;
 import java.util.Collection;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SpringLayout;
-import javax.swing.border.EmptyBorder;
 
 import com.google.common.base.Strings;
 
+import de.lordz.java.tools.tdm.common.IUserNotificationHandler;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
 import de.lordz.java.tools.tdm.common.Logger;
-import de.lordz.java.tools.tdm.entities.*;
+import de.lordz.java.tools.tdm.entities.Customer;
+import de.lordz.java.tools.tdm.entities.Trip;
+import de.lordz.java.tools.tdm.entities.TripType;
 import jiconfont.icons.font_awesome.FontAwesome;
-import jiconfont.swing.IconFontSwing;
 
-public class TripDialog extends JDialog {
+/**
+ * Dialog class for Trip add/delete operation.
+ * 
+ * @author lordzomat
+ *
+ */
+public class TripDialog extends EntityModelAddOrEditDialogBase<Trip> {
 
-    private static final long serialVersionUID = -3335942655314531982L;
-    private final JPanel contentPanel = new JPanel();
-    private JButton buttonOk;
-    private Trip currentTrip;
-    private TripBasicInfo tripBasicInfo;
-    private boolean dataSaved;
-
+    private static final long serialVersionUID = 2995570003557084308L;
+    final private TripDataPanel dataPanel = new TripDataPanel();
+    
     /**
-     * Create the dialog.
+     * Initializes a new instance of the <CODE>TripDialog</CODE> class.
+     * 
+     * @param userNotificationHandler the user notification handler.
      */
-    public TripDialog(Collection<Customer> customers, Collection<TripType> tripTypes) {
-        setBounds(100, 100, 469, 412);
-        setResizable(false);
-        setIconImage(IconFontSwing.buildImage(FontAwesome.CAR, 15, Color.lightGray));
-        getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        var springLayout = new SpringLayout();
-        contentPanel.setLayout(springLayout);
-        this.tripBasicInfo= new TripBasicInfo();
-        springLayout.putConstraint(SpringLayout.SOUTH, tripBasicInfo, 315, SpringLayout.NORTH, contentPanel);
-        springLayout.putConstraint(SpringLayout.EAST, tripBasicInfo, 438, SpringLayout.WEST, contentPanel);
-        this.tripBasicInfo.reloadReferenceData(customers, tripTypes);
-        this.tripBasicInfo.setEditable(true);
-        springLayout.putConstraint(SpringLayout.NORTH, this.tripBasicInfo, 5, SpringLayout.NORTH, contentPanel);
-        springLayout.putConstraint(SpringLayout.WEST, this.tripBasicInfo, 5, SpringLayout.WEST, contentPanel);
-        contentPanel.add(this.tripBasicInfo);
-
-        {
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-            {
-                this.buttonOk = new JButton(LocalizationProvider.getString("mainframe.button.accept"));
-                this.buttonOk.setActionCommand("OK");
-                this.buttonOk.addActionListener(e -> performButtonClick(e));
-                buttonPane.add(this.buttonOk);
-                getRootPane().setDefaultButton(this.buttonOk);
-            }
-            {
-                JButton cancelButton = new JButton(LocalizationProvider.getString("mainframe.button.cancel"));
-                cancelButton.setActionCommand("Cancel");
-                cancelButton.addActionListener(e -> performButtonClick(e));
-                buttonPane.add(cancelButton);
-            }
-        }
-    }
-
-    public boolean showDialog(Trip trip, java.awt.Window window) {
-        String titleKey = trip == null ? "tripbasicinfo.title.new" : "tripbasicinfo.title.edit";
-        try {
-            this.currentTrip = trip != null ? trip : new Trip();
-            this.tripBasicInfo.fillFromEnity(this.currentTrip);
-        } catch (Exception ex) {
-            Logger.Log(ex);
-        }
-
-        this.setTitle(LocalizationProvider.getString(titleKey));
-        this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-        this.setLocationRelativeTo(window);
-        this.setVisible(true);
-
-        return this.dataSaved;
-    }
-
-    private void performButtonClick(ActionEvent event) {
-        boolean closeDialog = true;
-        var source = event.getSource();
-        if (source != null && source == this.buttonOk) {
-            if (this.currentTrip != null) {
-                if (this.currentTrip.getCustomerId() == 0) {
-                    showErrorMessage(LocalizationProvider.getString("tripdialog.message.nocustomerselected"));
-                    closeDialog = false;
-                } else if (Strings.isNullOrEmpty(this.currentTrip.getTimeOfTrip())) {
-                    showErrorMessage(LocalizationProvider.getString("tripdialog.message.nodatetimmeselected"));
-                    closeDialog = false;
-                }                
-                
-                if (closeDialog) {
-                    if (this.currentTrip.getId() > 0) {
-                        this.dataSaved = DatabaseProvider.updateEntity(this.currentTrip);
-                    } else {
-                        this.dataSaved = DatabaseProvider.saveEntity(this.currentTrip);
-                    }
-                }
-            }
-        }
-
-        if (closeDialog) {
-            this.setVisible(false);
-        }
+    public TripDialog(IUserNotificationHandler userNotificationHandler) throws IllegalArgumentException {
+        super(FontAwesome.CAR, userNotificationHandler);
+        super.setDataComponent(this.dataPanel);
+        setBounds(100, 100, 460, 350);
+        this.dataPanel.setEditable(true);
     }
     
-    private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, getTitle(),
-                JOptionPane.ERROR_MESSAGE);
+    public void showDialog(Trip entity, Collection<Customer> customers, Collection<TripType> tripTypes, Component window) {
+        this.dataPanel.reloadReferenceData(customers, tripTypes);
+        super.showDialog(entity, window);
+    }
+    
+    @Override
+    protected void initializeDialog(Trip entity) {
+        try {
+            final var titleKey = entity == null ? "tripbasicinfo.title.new" : "tripbasicinfo.title.edit";
+            setTitle(LocalizationProvider.getString(titleKey));
+            if (entity == null) {
+                entity = new Trip();
+                setEntity(entity);
+            }
+
+            this.dataPanel.fillFromEnity(entity);
+        } catch (Exception ex) {
+            Logger.Log(ex);
+        }   
+    }
+
+    @Override
+    protected boolean isValid(Trip entity) {
+        boolean valid = true;
+        if (entity != null) {
+            if (entity.getCustomerId() == 0) {
+                showErrorMessage(LocalizationProvider.getString("tripdialog.message.nocustomerselected"));
+                valid = false;
+            } else if (entity.getTripTypeId() == 0) {
+                showErrorMessage(LocalizationProvider.getString("tripdialog.message.notriptypeselected"));
+                valid = false;
+            } else if (Strings.isNullOrEmpty(entity.getTimeOfTrip())) {
+                showErrorMessage(LocalizationProvider.getString("tripdialog.message.nodatetimmeselected"));
+                valid = false;
+            }
+        } else {
+            showErrorMessage(LocalizationProvider.getString("dialog.generalvalidationerror"));
+            valid = false;
+        }
+        
+        return valid;
     }
 }

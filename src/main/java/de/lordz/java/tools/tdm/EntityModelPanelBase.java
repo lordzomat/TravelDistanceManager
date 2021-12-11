@@ -4,15 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -29,11 +30,13 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
     private final JButton buttonNew;
     private final JButton buttonEdit;
     private final JButton buttonDelete;
+    private final JToolBar toolbar;
     private final JPanel panelDataContent;
     private final Class<? extends T> entityType;
     private final JTable table;
     private Component contentComponent;
     private HashMap<Integer, T> cachedEntities;
+    private ActionListener tableReloadedActionListener;
     
     public EntityModelPanelBase(Class<? extends T> entityType) {
         this.entityType = entityType;
@@ -57,9 +60,9 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
         contentPanel.add(panelRightContent, BorderLayout.CENTER);
         panelRightContent.setLayout(new BorderLayout(0, 0));
         
-        var toolbar = new JToolBar();
-        toolbar.setFloatable(false);
-        panelRightContent.add(toolbar, BorderLayout.NORTH);
+        this.toolbar = new JToolBar();
+        this.toolbar.setFloatable(false);
+        panelRightContent.add(this.toolbar, BorderLayout.NORTH);
         
         this.buttonNew = new JButton(IconFontSwing.buildIcon(FontAwesome.PLUS_CIRCLE, 20, new Color(0, 150, 0)));
         this.buttonNew.setToolTipText(LocalizationProvider.getString("mainframe.button.new"));
@@ -79,6 +82,7 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
         this.panelDataContent = new JPanel();
         panelRightContent.add(panelDataContent, BorderLayout.CENTER);
         this.panelDataContent.setLayout(new BorderLayout(0, 0));
+        this.panelDataContent.setBorder(new EmptyBorder(5, 0, 0, 0));
         
     }
     
@@ -87,6 +91,9 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
      */
     public void reloadTable() {
         performReloadTableViewModel();
+        if (this.tableReloadedActionListener != null) {
+            this.tableReloadedActionListener.actionPerformed(null);
+        }
     }
     
     /**
@@ -105,6 +112,10 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
      */
     public void setCachedEntities(List<T> entities) {
         this.cachedEntities = createEntityIdHashMap(entities);
+    }
+    
+    public void setTableReloadedActionListener(ActionListener actionListener) {
+        this.tableReloadedActionListener = actionListener;
     }
     
     /**
@@ -135,6 +146,10 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
     protected void setContentComponent(Component component) {
         this.contentComponent = component;
         this.panelDataContent.add(component, BorderLayout.NORTH);
+    }
+    
+    public void addToolbarComponent(Component component) {
+        this.toolbar.add(component);
     }
     
     protected JTable getTable() {
