@@ -48,9 +48,16 @@ public class TripDataPanel extends GridBagDataPanelBase {
         super(new int[] {100, 250}, new int[] {20, 20, 20, 160}, new double[]{0.0, 1.0}, new double[]{0.0, 1.0, 1.0, 1.0});
         
         this.comboBoxCustomer = new JComboBox<Customer>();
+        var prototypeCustomer = new Customer();
+        prototypeCustomer.setName("##########");
+        // used to get a fixed size of the combo box so it does not expand with it's content.
+        this.comboBoxCustomer.setPrototypeDisplayValue(prototypeCustomer);
         AddLabel(0, 0, LocalizationProvider.getString("tripbasicinfo.label.customer"));
         AddInput(1, 0, this.comboBoxCustomer, GridBagConstraints.HORIZONTAL);
         this.comboBoxTripType = new JComboBox<TripType>();
+        var prototypeTripType = new TripType();
+        prototypeTripType.setName("##########");
+        this.comboBoxTripType.setPrototypeDisplayValue(prototypeTripType);
         AddLabel(0, 1, LocalizationProvider.getString("tripbasicinfo.label.triptype"));
         AddInput(1, 1, this.comboBoxTripType, GridBagConstraints.HORIZONTAL);
         this.datePicker = DateTimeHelper.createDatePicker();

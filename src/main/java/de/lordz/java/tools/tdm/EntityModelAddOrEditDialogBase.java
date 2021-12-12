@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 
 import de.lordz.java.tools.tdm.common.IUserNotificationHandler;
 import de.lordz.java.tools.tdm.common.LocalizationProvider;
@@ -91,6 +92,7 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
     protected void setDataComponent(Component component) {
         var panel = new JPanel(new BorderLayout(0,0));
         panel.add(component, BorderLayout.WEST);
+        panel.setBorder(new EmptyBorder(5, 0, 0, 0));
         getContentPane().add(panel, BorderLayout.NORTH);
     }
     

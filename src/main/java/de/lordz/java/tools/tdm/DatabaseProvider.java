@@ -24,6 +24,7 @@ import de.lordz.java.tools.tdm.common.Logger;
  */
 public final class DatabaseProvider {
 
+    private static final int LATEST_DB_BUILD_NUMBER = 1;
     private static Object lockObject = new Object();
     private static AtomicBoolean isOpen = new AtomicBoolean();
     private static EntityManagerFactory factoryInstance;
@@ -283,6 +284,20 @@ public final class DatabaseProvider {
         
         return result;
     }
+    
+    /**
+     * Closes the database connection if open.
+     */
+    public static void closeDatabase() {
+        if (isOpen.get()) {
+            if (factoryInstance != null) {
+                factoryInstance.close();
+                factoryInstance = null;
+            }
+
+            isOpen.set(false);
+        }
+    }
 
     private static boolean ensureDatabaseIsCreated() {
         boolean result = false;
@@ -326,13 +341,9 @@ public final class DatabaseProvider {
                 var query = manager.createNativeQuery("SELECT count(*) FROM tbDatabaseHistory");
                 var historyResult = query.getSingleResult();
                 if (historyResult != null) {
-                    if ((int) historyResult == 0) {
-                        query = manager.createNativeQuery(
-                                "INSERT INTO tbDatabaseHistory (coTimestamp, coDescription) VALUES(?1, ?2)");
-                        query.setParameter(1, DateTimeHelper.getIsoDateTime());
-                        query.setParameter(2, "Database created");
-                        query.executeUpdate();
-                        
+                    int countOfEntries = (int)historyResult;
+                    if (countOfEntries == 0) {
+                        insertDatabaseHistoryEntry(manager, LATEST_DB_BUILD_NUMBER, "Database created");
                         query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
                         query.setParameter(1, "tbCustomers");
                         query.executeUpdate();
@@ -342,6 +353,31 @@ public final class DatabaseProvider {
                         query.executeUpdate();
                         query.setParameter(1, "tbTripType");
                         query.executeUpdate();
+                    } else {
+                        if (countOfEntries == 1) {
+                            query = manager.createNativeQuery("SELECT EXISTS (SELECT 1 FROM pragma_table_info('tbDatabaseHistory') WHERE name='coBuildNumber')");
+                            var checkBuildNumberExistsResult = query.getSingleResult();
+                            if (checkBuildNumberExistsResult != null && checkBuildNumberExistsResult instanceof Integer) {
+                                if ((int)checkBuildNumberExistsResult == 0) {
+                                    query = manager.createNativeQuery("ALTER TABLE tbDatabaseHistory ADD COLUMN coBuildNumber INTEGER NOT NULL DEFAULT 0");
+                                    query.executeUpdate();
+                                }
+                            }
+                        }
+                        
+                        query = manager.createNativeQuery("SELECT max(coBuildNumber) FROM tbDatabaseHistory");
+                        var buildNumberResult = query.getSingleResult();
+                        if (buildNumberResult != null && buildNumberResult instanceof Integer) {
+                            final var buildNumber = (int)buildNumberResult;
+                            if (buildNumber != LATEST_DB_BUILD_NUMBER) {
+                                if (buildNumber == 0) {
+                                    query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
+                                    query.setParameter(1, "tbTravelAllowance");
+                                    query.executeUpdate();
+                                    insertDatabaseHistoryEntry(manager, 1, "Upgrade 1");
+                                }
+                            }
+                        }
                     }
                     
                     result = true;
@@ -363,16 +399,13 @@ public final class DatabaseProvider {
 
         return null;
     }
-
-    public static void closeDatabase() {
-        if (isOpen.get()) {
-            if (factoryInstance != null) {
-                factoryInstance.close();
-                factoryInstance = null;
-            }
-
-            isOpen.set(false);
-        }
+    
+    private static void insertDatabaseHistoryEntry(EntityManager manager, int buildNumber, String description) {
+        final var query = manager.createNativeQuery(
+                "INSERT INTO tbDatabaseHistory (coTimestamp, coBuildNumber, coDescription) VALUES(?1, ?2, ?3)");
+        query.setParameter(1, DateTimeHelper.getIsoDateTime());
+        query.setParameter(2, buildNumber);
+        query.setParameter(3, description);
+        query.executeUpdate();
     }
-
 }

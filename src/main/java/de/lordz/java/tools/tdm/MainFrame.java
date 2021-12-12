@@ -98,10 +98,10 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
 
-        JMenu mainMenuItemFile = new JMenu(LocalizationProvider.getString("mainframe.menuitem.file"));
+        var mainMenuItemFile = new JMenu(LocalizationProvider.getString("mainframe.menuitem.file"));
         menuBar.add(mainMenuItemFile);
 
-        JMenuItem fileMenuItemOpenDatabase = new JMenuItem(
+        var fileMenuItemOpenDatabase = new JMenuItem(
                 LocalizationProvider.getString("mainframe.menuitem.opendatabase"));
         fileMenuItemOpenDatabase.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -131,7 +131,7 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         contentPane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
 
-        JPanel panel = new JPanel();
+        var panel = new JPanel();
         contentPane.add(panel);
         panel.setLayout(new BorderLayout(0, 0));
 
@@ -143,21 +143,19 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         this.customerPanel.setTableReloadedActionListener((e -> customerOrTripTypesReloadedEventHandler(e)));
         this.tripTypePanel = new TripTypePanel(this);
         this.tripTypePanel.setTableReloadedActionListener((e -> customerOrTripTypesReloadedEventHandler(e)));
-        this.tripPanel = new TripPanel(this, this.customerPanel, this.tripTypePanel);        
+        this.travelAllowancePanel = new TravelAllowancePanel(this);
+        this.tripPanel = new TripPanel(this, this.customerPanel, this.tripTypePanel);
 
         /*** Customers ****/        
-        
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.USERS, 15, Color.lightGray), this.customerPanel,
                 LocalizationProvider.getString("mainframe.button.tooltip.customers"));
         
         /*** Trips ****/
-        
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.CAR, 15, Color.lightGray), this.tripPanel,
                 LocalizationProvider.getString("mainframe.button.tooltip.trips"));
                 
-        /*** Trips ****/
-        
-        GridBagLayout gridBagLayout = new GridBagLayout();
+        /*** Trip types ****/
+        var  gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0 };
         gridBagLayout.rowHeights = new int[] {0, 0};
         gridBagLayout.columnWeights = new double[]{ 1.0 };
@@ -165,7 +163,7 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         var panelGeneralData = new JPanel(gridBagLayout);        
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.COG, 15, Color.lightGray), panelGeneralData,
                 LocalizationProvider.getString("mainframe.button.tooltip.commondata"));
-        this.travelAllowancePanel = new TravelAllowancePanel(this);
+        
         this.travelAllowancePanel.setBorder(new TitledBorder(null, LocalizationProvider.getString("mainframe.panel.title.travelallowance"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
         var constraintTripTypes = new GridBagConstraints();
         constraintTripTypes.anchor = GridBagConstraints.WEST;
@@ -185,7 +183,7 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         
         /*** Reports ****/
         
-        JPanel panelReport = new JPanel();
+        var panelReport = new JPanel();
         tabbedPane.addTab(null, IconFontSwing.buildIcon(FontAwesome.FILE_TEXT_O, 15, Color.lightGray), panelReport,
                 LocalizationProvider.getString("mainframe.button.tooltip.report"));
         panelReport.setLayout(new BorderLayout(0, 0));
