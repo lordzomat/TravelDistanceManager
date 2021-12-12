@@ -125,11 +125,11 @@ public class TripPanel extends EntityModelPanelBase<Trip> {
         
         this.buttonFilterGoToPreviousMonth = new JButton(IconFontSwing.buildIcon(FontAwesome.ANGLE_LEFT, 20, new Color(0, 145, 255)));
         this.buttonFilterGoToPreviousMonth.setToolTipText(LocalizationProvider.getString("trippanel.label.filter.previousmonth"));
-        this.buttonFilterGoToPreviousMonth.addActionListener(e -> setMonth(false));
+        this.buttonFilterGoToPreviousMonth.addActionListener(e -> performMoveMonth(false));
         addToolbarComponent(this.buttonFilterGoToPreviousMonth);
         this.buttonFilterGoToNextMonth = new JButton(IconFontSwing.buildIcon(FontAwesome.ANGLE_RIGHT, 20, new Color(0, 145, 255)));
         this.buttonFilterGoToNextMonth.setToolTipText(LocalizationProvider.getString("trippanel.label.filter.nextmonth"));
-        this.buttonFilterGoToNextMonth.addActionListener(e -> setMonth(true));
+        this.buttonFilterGoToNextMonth.addActionListener(e -> performMoveMonth(true));
         addToolbarComponent(this.buttonFilterGoToNextMonth);
         
         this.textFieldFilterYear = new JTextField(String.valueOf(currentYear));
@@ -143,19 +143,6 @@ public class TripPanel extends EntityModelPanelBase<Trip> {
         
         setContentComponent(this.tripDataPanel);
         performFilterTypeChanged();
-    }
-    
-    private void setMonth(boolean forward) {
-        var selectedIndex = this.comboBoxFilterMonth.getSelectedIndex();
-        if (forward) {
-            if (selectedIndex != 11) {
-                selectedIndex++;
-            }
-        } else if (selectedIndex != 0) {            
-            selectedIndex--;
-        }
-        
-        this.comboBoxFilterMonth.setSelectedIndex(selectedIndex);
     }
     
     public void reloadReferenceData() {
@@ -379,6 +366,19 @@ public class TripPanel extends EntityModelPanelBase<Trip> {
         } catch (Exception ex) {
             Logger.Log(ex);
         }
+    }
+    
+    private void performMoveMonth(boolean forward) {
+        var selectedIndex = this.comboBoxFilterMonth.getSelectedIndex();
+        if (forward) {
+            if (selectedIndex != 11) {
+                selectedIndex++;
+            }
+        } else if (selectedIndex != 0) {            
+            selectedIndex--;
+        }
+        
+        this.comboBoxFilterMonth.setSelectedIndex(selectedIndex);
     }
     
     private static boolean isValidYear(String value) {
