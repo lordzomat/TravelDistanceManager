@@ -17,8 +17,9 @@ public class TripTypeDataPanel extends GridBagDataPanelBase {
 
     private static final long serialVersionUID = 6012453072233623623L;
     private TripType currentTripType;
-    private boolean editMode;
     private JTextField textFieldName;
+    private boolean editMode;
+    private boolean listenersInitialized;
 
     /**
      * Initializes a new instance of the <CODE>TripTypeDataPanel</CODE> class.
@@ -46,8 +47,13 @@ public class TripTypeDataPanel extends GridBagDataPanelBase {
 
         if (this.editMode) {
             this.currentTripType = entity;
-            this.textFieldName.getDocument()
-                    .addDocumentListener(new EntityTextChangeDocumentListener((value) -> this.currentTripType.setName(value)));
+            if (!this.listenersInitialized) {
+                this.textFieldName.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentTripType.setName(value)));
+                this.listenersInitialized = true;
+            }
+            
+            this.textFieldName.requestFocusInWindow();
         }
     }
 

@@ -22,6 +22,7 @@ public class TravelAllowanceDataPanel extends GridBagDataPanelBase {
     private JTextField textFieldValue;
     private DatePicker datePickerValidFrom;
     private DatePicker datePickerInvalidFrom;
+    private boolean listenersInitialized;
 
     /**
      * Initializes a new instance of the <CODE>TravelAllowanceDataPanel</CODE> class.
@@ -56,9 +57,14 @@ public class TravelAllowanceDataPanel extends GridBagDataPanelBase {
 
         if (this.editMode) {
             this.currentEntity = entity;
-            this.textFieldValue.getDocument().addDocumentListener(new EntityTextChangeDocumentListener((value) -> setRate(value)));
-            this.datePickerValidFrom.addDateChangeListener(e -> setDate(true));
-            this.datePickerInvalidFrom.addDateChangeListener(e -> setDate(false));
+            if (!this.listenersInitialized) {
+                this.textFieldValue.getDocument().addDocumentListener(new EntityTextChangeDocumentListener((value) -> setRate(value)));
+                this.datePickerValidFrom.addDateChangeListener(e -> setDate(true));
+                this.datePickerInvalidFrom.addDateChangeListener(e -> setDate(false));
+                this.listenersInitialized = true;
+            }
+            
+            this.textFieldValue.requestFocusInWindow();
         }
     }
     

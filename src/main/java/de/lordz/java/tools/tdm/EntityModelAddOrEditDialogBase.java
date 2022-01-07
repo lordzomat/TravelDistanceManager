@@ -6,6 +6,7 @@ import java.awt.Dialog;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -31,9 +32,11 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
 
     private static final long serialVersionUID = -6946143668242451743L;
     private final JButton buttonOk;
+    private final JButton buttonOkContinue;
     private final IUserNotificationHandler userNotificationHandler;
     private T currentEntity;
-    private boolean dataSaved;
+    private boolean anyDataSaved;
+    private ActionListener dataSavedActionListener;
 
     /**
      * Initializes a new instance of the <CODE>EntityModelAddOrEditDialogBase</CODE> class.
@@ -55,6 +58,11 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
         var buttonPane = new JPanel();
         buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
+        this.buttonOkContinue = new JButton(LocalizationProvider.getString("mainframe.button.acceptcontinue"));
+        this.buttonOkContinue.setActionCommand("OK");
+        this.buttonOkContinue.addActionListener(e -> performButtonClick(e));
+        this.buttonOkContinue.setVisible(false);
+        buttonPane.add(this.buttonOkContinue);
         this.buttonOk = new JButton(LocalizationProvider.getString("mainframe.button.accept"));
         this.buttonOk.setActionCommand("OK");
         this.buttonOk.addActionListener(e -> performButtonClick(e));
@@ -77,11 +85,21 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
         setEntity(entity);
         initializeDialog(entity);
 
+        this.buttonOkContinue.setVisible(entity == null);
         this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         this.setLocationRelativeTo(window);
         this.setVisible(true);
 
-        return this.dataSaved;
+        return this.anyDataSaved;
+    }
+    
+    /**
+     * Sets the action listener to call if data was saved.
+     * 
+     * @param actionListener The action listener to call.
+     */
+    public void setDataSavedActionListener(ActionListener actionListener) {
+        this.dataSavedActionListener = actionListener;
     }
         
     /**
@@ -143,21 +161,35 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
         try {
             boolean closeDialog = true;
             var source = event.getSource();
-            if (source != null && source == this.buttonOk) {
+            if (source != null && (source == this.buttonOk || source == this.buttonOkContinue)) {
                 if (this.currentEntity != null) {
                     closeDialog = isValid(this.currentEntity);
                     if (closeDialog) {
+                        boolean succeeded = false;
                         if (this.currentEntity.getId() > 0) {
-                            this.dataSaved = DatabaseProvider.updateEntity(this.currentEntity);
+                            succeeded = DatabaseProvider.updateEntity(this.currentEntity);
                         } else {
-                            this.dataSaved = DatabaseProvider.saveEntity(this.currentEntity);
+                            succeeded = DatabaseProvider.saveEntity(this.currentEntity);
+                        }
+                        
+                        if (succeeded) {
+                            this.anyDataSaved = true;
                         }
                     }
                 }
             }
     
             if (closeDialog) {
-                this.setVisible(false);
+                if (source == this.buttonOkContinue) {
+                    setEntity(null);
+                    initializeDialog(null);
+                    var actionListener = this.dataSavedActionListener;
+                    if (actionListener != null) {
+                        actionListener.actionPerformed(null);
+                    }
+                } else {
+                    this.setVisible(false); 
+                }
             }
         } catch (Exception ex) {
             Logger.Log(ex);

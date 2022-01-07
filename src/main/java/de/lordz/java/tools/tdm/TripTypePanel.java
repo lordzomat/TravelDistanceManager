@@ -38,6 +38,7 @@ public class TripTypePanel extends EntityModelPanelBase<TripType> {
         
         this.mainWindow = mainWindow;
         this.dialog = new TripTypeDialog(this.userNotificationHandler);
+        this.dialog.setDataSavedActionListener(e -> performReloadTableViewModel());
         this.tripTypeDataPanel = new TripTypeDataPanel();
         this.tripTypeDataPanel.setEditable(false);
         setContentComponent(this.tripTypeDataPanel);

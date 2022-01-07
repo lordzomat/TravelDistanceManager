@@ -27,3 +27,27 @@ Trips types view
 Report view
 
 ![Customers](images/reports.png)
+
+
+JSON configuration file for PostgreSQL (file extension .pg):
+============================
+
+```
+{
+	"Server":"<server>:<port>",
+	"DatabaseName":"<database name>",
+	"User":"<user>",
+	"Password":"<password>"
+}
+```
+
+Setup PostgreSQL database:
+============================
+
+Use the following script to create the tables and add a specific user:
+
+
+[create_postgresql.sql](database/create_postgresql.sql)
+
+
+

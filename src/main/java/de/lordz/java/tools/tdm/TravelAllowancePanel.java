@@ -40,6 +40,7 @@ public class TravelAllowancePanel extends EntityModelPanelBase<TravelAllowance> 
         
         this.mainWindow = mainWindow;
         this.dialog = new TravelAllowanceDialog(this.userNotificationHandler);
+        this.dialog.setDataSavedActionListener(e -> performReloadTableViewModel());
         this.travelAllowanceDataPanel = new TravelAllowanceDataPanel();
         this.travelAllowanceDataPanel.setEditable(false);
         setContentComponent(this.travelAllowanceDataPanel);

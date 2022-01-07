@@ -32,6 +32,7 @@ public class CustomerDataPanel extends GridBagDataPanelBase {
     private JTextArea textAreaDescription;
     private Customer currentCustomer;
     private boolean editMode;
+    private boolean listenersInitialized;
 
     /**
      * Initializes a new instance of the <CODE>CustomerDataPanel</CODE> class.
@@ -88,18 +89,23 @@ public class CustomerDataPanel extends GridBagDataPanelBase {
 
         if (this.editMode) {
             this.currentCustomer = customer;
-            this.textFieldName.getDocument().addDocumentListener(
-                    new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setName(value)));
-            this.textFieldStreet.getDocument().addDocumentListener(
-                    new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setStreet(value)));
-            this.textFieldPostcode.getDocument().addDocumentListener(
-                    new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setPostcode(value)));
-            this.textFieldCity.getDocument().addDocumentListener(
-                    new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setCity(value)));
-            this.textFieldDistance.getDocument()
-                    .addDocumentListener(new EntityTextChangeDocumentListener((value) -> updateDistance(value)));
-            this.textAreaDescription.getDocument().addDocumentListener(
-                    new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setDescription(value)));
+            if (!this.listenersInitialized) {
+                this.textFieldName.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setName(value)));
+                this.textFieldStreet.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setStreet(value)));
+                this.textFieldPostcode.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setPostcode(value)));
+                this.textFieldCity.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setCity(value)));
+                this.textFieldDistance.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> updateDistance(value)));
+                this.textAreaDescription.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentCustomer.setDescription(value)));
+                this.listenersInitialized = true;
+            } 
+            
+            this.textFieldName.requestFocusInWindow();
         }
     }
     

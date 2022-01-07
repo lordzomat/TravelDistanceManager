@@ -1,6 +1,7 @@
 package de.lordz.java.tools.tdm;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.google.common.base.Strings;
 
 import de.lordz.java.tools.tdm.common.DateTimeHelper;
 import de.lordz.java.tools.tdm.common.Logger;
+import de.lordz.java.tools.tdm.config.DatabaseConnectionConfiguration;
 
 /**
  * Provides access to the applications database using a EntityManagerFactory.
@@ -27,6 +29,7 @@ public final class DatabaseProvider {
     private static final int LATEST_DB_BUILD_NUMBER = 1;
     private static Object lockObject = new Object();
     private static AtomicBoolean isOpen = new AtomicBoolean();
+    private static AtomicBoolean isSqlite = new AtomicBoolean();
     private static EntityManagerFactory factoryInstance;
 
     /**
@@ -45,26 +48,48 @@ public final class DatabaseProvider {
             synchronized (lockObject) {
                 if (!Strings.isNullOrEmpty(databasePath) && factoryInstance == null) {
                     final var persistenceMap = new HashMap<String, String>();
-                    persistenceMap.put("javax.persistence.jdbc.url", "jdbc:sqlite:" + databasePath);
-                    persistenceMap.put("javax.persistence.jdbc.user", "");
-                    persistenceMap.put("javax.persistence.jdbc.password", "");
-                    persistenceMap.put("javax.persistence.jdbc.driver", "org.sqlite.JDBC");
+                    boolean isSqliteDatabase = !databasePath.endsWith(".pg");
+                    isSqlite.set(isSqliteDatabase);
+                    if (isSqliteDatabase) {
+                        persistenceMap.put("javax.persistence.jdbc.url", "jdbc:sqlite:" + databasePath);
+                        persistenceMap.put("javax.persistence.jdbc.user", "");
+                        persistenceMap.put("javax.persistence.jdbc.password", "");
+                        persistenceMap.put("javax.persistence.jdbc.driver", "org.sqlite.JDBC");
+                    } else {
+                        var configuration = DatabaseConnectionConfiguration.loadFromFile(Path.of(databasePath));
+                        if (configuration != null) {
+                            final var server = configuration.Server;
+                            final var databaseName = configuration.DatabaseName;
+                            if (!Strings.isNullOrEmpty(server) && !Strings.isNullOrEmpty(databaseName)) {
+                                final var postgreServerUrl = String.format("jdbc:postgresql://%s/%s", server, databaseName);
+                                persistenceMap.put("javax.persistence.jdbc.url", postgreServerUrl);
+                                persistenceMap.put("javax.persistence.jdbc.user", configuration.User);
+                                persistenceMap.put("javax.persistence.jdbc.password", configuration.Password);
+                                persistenceMap.put("javax.persistence.jdbc.driver", "org.postgresql.Driver");                            
+                            }
+                        }
+                    }
 
                     factoryInstance = Persistence.createEntityManagerFactory("TravelDistanceManager", persistenceMap);
-                    if (ensureDatabaseIsCreated()) {
-                        var manager = createEntityManager();
-                        if (manager != null) {
-                            var nativeQuery = manager.createNativeQuery("PRAGMA journal_mode=WAL;");
-                            if (nativeQuery != null) {
-                                nativeQuery.getSingleResult();
+                    if (ensureDatabaseIsCreated(isSqliteDatabase)) {
+                        if (isSqliteDatabase) {
+                            var manager = createEntityManager();
+                            if (manager != null) {
+                                var nativeQuery = manager.createNativeQuery("PRAGMA journal_mode=WAL;");
+                                if (nativeQuery != null) {
+                                    nativeQuery.getSingleResult();
+                                }
+                                manager.close();
+                            
                             }
-                            manager.close();
                         }
                         
                         isOpen.set(true);
                         result = true;
                         Logger.LogVerbose("Database %s was openend", databasePath);
                     } else {
+                        factoryInstance.close();
+                        factoryInstance = null;
                         Logger.LogError("Checking database '%s' failed!", databasePath);
                     }
                 } else {
@@ -299,52 +324,63 @@ public final class DatabaseProvider {
         }
     }
 
-    private static boolean ensureDatabaseIsCreated() {
+    private static boolean ensureDatabaseIsCreated(boolean isSqliteDatabase) {
         boolean result = false;
+        EntityManager manager = null;
         try {
-            final var manager = createEntityManager();
+            manager = createEntityManager();
             if (manager != null) {
                 final var transaction = manager.getTransaction();
                 transaction.begin();
-                try (final InputStream inputStream = DatabaseProvider.class.getClassLoader()
-                        .getResourceAsStream("META-INF/create.sql")) {
-                    if (inputStream != null) {
-                        try (final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
-                            while (reader.ready()) {
-                                var line = reader.readLine();
-                                if (!Strings.isNullOrEmpty(line)) {
-                                    var query = manager.createNativeQuery(line);
-                                    query.executeUpdate();
+                if (isSqliteDatabase) {
+                    try (final InputStream inputStream = DatabaseProvider.class.getClassLoader()
+                            .getResourceAsStream("META-INF/create.sql")) {
+                        if (inputStream != null) {
+                            try (final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
+                                while (reader.ready()) {
+                                    var line = reader.readLine();
+                                    if (!Strings.isNullOrEmpty(line)) {
+                                        var query = manager.createNativeQuery(line);
+                                        query.executeUpdate();
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                if (initializeHistoryAndSequence(manager)) {
+                if (initializeHistoryAndSequence(manager, isSqliteDatabase)) {
                     transaction.commit();
                     manager.close();
+                    manager = null;
                     result = true;
+                } else {
+                    transaction.rollback();
                 }
             }
         } catch (Exception ex) {
             Logger.Log(ex);
+        } finally {
+            if (manager != null) {
+                manager.close();
+            }
         }
 
         return result;
     }
 
-    private static boolean initializeHistoryAndSequence(final EntityManager manager) {
+    private static boolean initializeHistoryAndSequence(final EntityManager manager, boolean isSqliteDatabase) {
         boolean result = false;
         try {
             if (manager != null) {
-                var query = manager.createNativeQuery("SELECT count(*) FROM tbDatabaseHistory");
+                final var countSelect = isSqliteDatabase ? "count(*)": "cast(count(*) as smallint)";
+                var query = manager.createNativeQuery("SELECT " + countSelect + " FROM tbDatabaseHistory");
                 var historyResult = query.getSingleResult();
                 if (historyResult != null) {
                     int countOfEntries = (int)historyResult;
                     if (countOfEntries == 0) {
-                        insertDatabaseHistoryEntry(manager, LATEST_DB_BUILD_NUMBER, "Database created");
                         query = manager.createNativeQuery("INSERT INTO sqlite_sequence (name, seq) VALUES(?1, 0)");
+                        insertDatabaseHistoryEntry(manager, LATEST_DB_BUILD_NUMBER, "Database created");
                         query.setParameter(1, "tbCustomers");
                         query.executeUpdate();
                         query.setParameter(1, "tbTravelAllowance");
@@ -354,7 +390,7 @@ public final class DatabaseProvider {
                         query.setParameter(1, "tbTripType");
                         query.executeUpdate();
                     } else {
-                        if (countOfEntries == 1) {
+                        if (countOfEntries == 1 && isSqliteDatabase) {
                             query = manager.createNativeQuery("SELECT EXISTS (SELECT 1 FROM pragma_table_info('tbDatabaseHistory') WHERE name='coBuildNumber')");
                             var checkBuildNumberExistsResult = query.getSingleResult();
                             if (checkBuildNumberExistsResult != null && checkBuildNumberExistsResult instanceof Integer) {

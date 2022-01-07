@@ -37,6 +37,7 @@ public class CustomerPanel extends EntityModelPanelBase<Customer> {
         
         this.mainWindow = mainWindow;
         this.dialog = new CustomerDialog(this.userNotificationHandler);
+        this.dialog.setDataSavedActionListener(e -> performReloadTableViewModel());
         this.customerDataPanel = new CustomerDataPanel();
         this.customerDataPanel.setEditable(false);
         setContentComponent(this.customerDataPanel);

@@ -40,6 +40,7 @@ public class TripDataPanel extends GridBagDataPanelBase {
     private ArrayList<TripType> currentTripTypeEntities;
     private Trip currentTrip;
     private boolean editMode;
+    private boolean listenersInitialized;
 
     /**
      * Initializes a new instance of the <CODE>TripDataPanel</CODE> class.
@@ -48,6 +49,7 @@ public class TripDataPanel extends GridBagDataPanelBase {
         super(new int[] {100, 250}, new int[] {20, 20, 20, 160}, new double[]{0.0, 1.0}, new double[]{0.0, 1.0, 1.0, 1.0});
         
         this.comboBoxCustomer = new JComboBox<Customer>();
+        
         var prototypeCustomer = new Customer();
         prototypeCustomer.setName("##########");
         // used to get a fixed size of the combo box so it does not expand with it's content.
@@ -127,11 +129,17 @@ public class TripDataPanel extends GridBagDataPanelBase {
             this.currentTrip = entity;
             setSelectedCustomer();
             setSelectedTripType();
-            this.textAreaDescription.getDocument()
-                    .addDocumentListener(new EntityTextChangeDocumentListener((value) -> this.currentTrip.setDescription(value)));
-            this.comboBoxCustomer.addActionListener(e -> setSelectedCustomer());
-            this.comboBoxTripType.addActionListener(e -> setSelectedTripType());
-            this.datePicker.addDateChangeListener(e -> setTimeOfTrip());
+            if (!this.listenersInitialized) {
+                ComboBoxAutoCompletion.enable(this.comboBoxCustomer);
+                this.textAreaDescription.getDocument().addDocumentListener(
+                        new EntityTextChangeDocumentListener((value) -> this.currentTrip.setDescription(value)));
+                this.comboBoxCustomer.addActionListener(e -> setSelectedCustomer());
+                this.comboBoxTripType.addActionListener(e -> setSelectedTripType());
+                this.datePicker.addDateChangeListener(e -> setTimeOfTrip());
+                this.listenersInitialized = true;
+            }
+            
+            this.comboBoxCustomer.requestFocusInWindow();
         }
     }
     

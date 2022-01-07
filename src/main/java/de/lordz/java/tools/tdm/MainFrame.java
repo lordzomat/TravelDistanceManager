@@ -373,14 +373,17 @@ public class MainFrame extends JFrame implements IUserNotificationHandler {
         try {
             final var fileChooser = new JFileChooser();
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-            var filter = new FileNameExtensionFilter(
+            var filterSqlite = new FileNameExtensionFilter(
                     LocalizationProvider.getString("mainframe.filechooser.databasefile"), "db");
-            fileChooser.setFileFilter(filter);
+            var filterPostgreSql = new FileNameExtensionFilter(
+                    LocalizationProvider.getString("mainframe.filechooser.databaseconfigurationpg"), "pg");
+            fileChooser.addChoosableFileFilter(filterPostgreSql);
+            fileChooser.setFileFilter(filterSqlite);
             fileChooser.setAcceptAllFileFilterUsed(false);
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 var databasePath = fileChooser.getSelectedFile().toString();
-                if (!databasePath.endsWith(".db")) {
+                if (!databasePath.endsWith(".db") && !databasePath.endsWith(".pg")) {
                     databasePath = databasePath + ".db";
                 }
                 

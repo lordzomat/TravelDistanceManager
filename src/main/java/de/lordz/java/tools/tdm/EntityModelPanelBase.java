@@ -114,6 +114,11 @@ public abstract class EntityModelPanelBase<T extends IEntityId> extends JPanel {
         this.cachedEntities = createEntityIdHashMap(entities);
     }
     
+    /**
+     * Sets the action listener to call if table has reloaded.
+     * 
+     * @param actionListener The action listener to call.
+     */
     public void setTableReloadedActionListener(ActionListener actionListener) {
         this.tableReloadedActionListener = actionListener;
     }

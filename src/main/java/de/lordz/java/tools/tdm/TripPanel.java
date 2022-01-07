@@ -80,6 +80,7 @@ public class TripPanel extends EntityModelPanelBase<Trip> {
         this.customerPanel = customerPanel;
         this.tripTypePanel = tripTypePanel;
         this.dialog = new TripDialog(this.userNotificationHandler);
+        this.dialog.setDataSavedActionListener(e -> performReloadTableViewModel());
         this.tripDataPanel = new TripDataPanel();
         this.tripDataPanel.setEditable(false);        
         this.toggleButtonTripFilterEnabled = new JToggleButton(IconFontSwing.buildIcon(FontAwesome.FILTER, 20, new Color(0, 145, 255)));
