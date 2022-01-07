@@ -98,4 +98,12 @@ public class GridBagDataPanelBase extends JPanel {
         textComponent.setText(text);
         textComponent.setCaretPosition(0);
     }
+    
+    /**
+     * Retrieves the content panel.
+     * @return The <CODE>JPanel</CODE> containing the content components.
+     */
+    protected JPanel getGridBagContentPanel() {
+        return this.contentPanel;
+    }
 }

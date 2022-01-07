@@ -118,10 +118,13 @@ public class CustomerDataPanel extends GridBagDataPanelBase {
     public void setEditable(boolean editable) {
         this.editMode = editable;
         var border = BorderFactory.createLineBorder(Color.LIGHT_GRAY);
-        for (Component item : getComponents()) {
-            if (item != null && item instanceof JTextComponent) {
-                var textComponent = (JTextComponent) item;
-                textComponent.setEditable(editable);
+        var contentPanel = getGridBagContentPanel();
+        if (contentPanel != null) {
+            for (Component item : contentPanel.getComponents()) {
+                if (item != null && item instanceof JTextComponent) {
+                    var textComponent = (JTextComponent) item;
+                    textComponent.setEditable(editable);
+                }
             }
         }
 
