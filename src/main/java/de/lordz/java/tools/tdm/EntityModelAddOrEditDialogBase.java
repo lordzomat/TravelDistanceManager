@@ -67,7 +67,7 @@ public abstract class EntityModelAddOrEditDialogBase<T extends IEntityId> extend
         this.buttonOk.setActionCommand("OK");
         this.buttonOk.addActionListener(e -> performButtonClick(e));
         buttonPane.add(this.buttonOk);
-        getRootPane().setDefaultButton(this.buttonOk);
+        getRootPane().setDefaultButton(this.buttonOkContinue);
         var cancelButton = new JButton(LocalizationProvider.getString("mainframe.button.cancel"));
         cancelButton.setActionCommand("Cancel");
         cancelButton.addActionListener(e -> performButtonClick(e));

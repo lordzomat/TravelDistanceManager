@@ -39,7 +39,6 @@ public class TripTypeDataPanel extends GridBagDataPanelBase {
      */
     public void fillFromEnity(TripType entity) {
         if (entity != null) {
-
             this.textFieldName.setText(entity.getName());
         } else {
             entity = new TripType();
